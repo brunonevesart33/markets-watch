@@ -57,8 +57,8 @@
     .utc-clock b { color: var(--text); }
 
     /* ── Grid ── */
-    .grid { display: grid; grid-template-columns: repeat(3,1fr); grid-template-rows: repeat(2,1fr); gap: 10px; padding: 10px; flex: 1; min-height: 0; }
-    .chart-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; min-height: 290px; transition: box-shadow .2s; }
+    .grid { display: grid; grid-template-columns: repeat(3,1fr); grid-template-rows: repeat(2,1fr); gap: 10px; padding: 10px; min-height: 680px; }
+    .chart-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; min-height: 320px; transition: box-shadow .2s; }
     .chart-card:hover { box-shadow: 0 0 0 1px rgba(88,166,255,.4); }
     .chart-card.fullscreen { position: fixed !important; inset: 0 !important; z-index: 1000 !important; border-radius: 0 !important; min-height: 100vh !important; }
     .chart-card.fullscreen .chart-wrap { flex: 1; }
@@ -90,7 +90,7 @@
       padding: 2px 6px; pointer-events: none; }
 
     /* ── Bottom panel ── */
-    .bottom-panel { display: flex; gap: 10px; padding: 0 10px 10px; min-height: 300px; }
+    .bottom-panel { display: flex; gap: 10px; padding: 0 10px 10px; min-height: 220px; }
     .panel-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
     .panel-box.calendar { flex: 1; }
     .panel-head { padding: 7px 12px; font-size: 11px; font-weight: 700; color: var(--text); background: var(--bg3); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: .5px; flex-shrink: 0; }
