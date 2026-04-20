@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markets Dashboard</title>
+  <style>
+    :root {
+      --bg:     #0d1117; --bg2:    #161b22; --bg3:    #1c2128;
+      --border: #30363d; --text:   #e6edf3; --text2:  #8b949e;
+      --accent: #58a6ff; --green:  #3fb950; --red:    #f85149;
+    }
+    [data-theme="light"] {
+      --bg:     #f6f8fa; --bg2:    #ffffff; --bg3:    #f0f2f5;
+      --border: #d0d7de; --text:   #1f2328; --text2:  #656d76;
+      --accent: #0969da; --green:  #1a7f37; --red:    #d1242f;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* ── Header ── */
+    header { display: flex; align-items: center; justify-content: space-between; padding: 10px 18px; background: var(--bg2); border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 8px; }
+    .logo { font-size: 16px; font-weight: 700; color: var(--accent); letter-spacing: .3px; }
+    .logo span { color: var(--text); }
+    .header-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .tf-bar { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+    .tf-label { font-size: 10px; color: var(--text2); margin-right: 2px; text-transform: uppercase; letter-spacing: .6px; }
+    .tf-btn { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); padding: 4px 9px; border-radius: 5px; font-size: 11px; font-weight: 500; cursor: pointer; transition: all .15s; }
+    .tf-btn:hover { background: var(--border); color: var(--text); }
+    .tf-btn.active { background: #1f6feb; border-color: #388bfd; color: #fff; }
+    .icon-btn { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); padding: 4px 10px; border-radius: 5px; font-size: 12px; cursor: pointer; transition: all .15s; white-space: nowrap; }
+    .icon-btn:hover { background: var(--border); color: var(--text); }
+
+    /* ── Sessions bar ── */
+    .sessions-bar { display: flex; align-items: center; gap: 7px; padding: 6px 18px; background: var(--bg); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+    .session-card { display: flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg2); transition: all .3s; }
+    .session-card.open { border-color: rgba(63,185,80,.5); background: rgba(63,185,80,.07); }
+    .session-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text2); flex-shrink: 0; }
+    .session-card.open .session-dot { background: var(--green); box-shadow: 0 0 6px rgba(63,185,80,.7); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{box-shadow:0 0 4px rgba(63,185,80,.6)} 50%{box-shadow:0 0 9px rgba(63,185,80,1)} }
+    .session-name { font-size: 11px; font-weight: 700; color: var(--text); line-height: 1.1; }
+    .session-card.open .session-name { color: var(--green); }
+    .session-hours { font-size: 9px; color: var(--text2); }
+    .session-badge { font-size: 8px; font-weight: 700; text-transform: uppercase; padding: 1px 4px; border-radius: 3px; background: var(--bg3); color: var(--text2); margin-left: 2px; }
+    .session-card.open .session-badge { background: rgba(63,185,80,.2); color: var(--green); }
+
+    /* Fear & Greed pill */
+    .fng-pill { display: flex; align-items: center; gap: 10px; padding: 4px 13px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg2); }
+    .fng-label { font-size: 9px; color: var(--text2); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 1px; }
+    .fng-row { display: flex; align-items: baseline; gap: 5px; }
+    .fng-val { font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .fng-cls { font-size: 10px; font-weight: 600; }
+    .fng-gauge { width: 60px; height: 6px; border-radius: 3px; background: var(--bg3); overflow: hidden; }
+    .fng-gauge-fill { height: 100%; border-radius: 3px; transition: width .5s; }
+
+    .utc-clock { margin-left: auto; font-size: 11px; font-variant-numeric: tabular-nums; color: var(--text2); white-space: nowrap; }
+    .utc-clock b { color: var(--text); }
+
+    /* ── Grid ── */
+    .grid { display: grid; grid-template-columns: repeat(3,1fr); grid-template-rows: repeat(2,1fr); gap: 10px; padding: 10px; flex: 1; min-height: 0; }
+    .chart-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; min-height: 290px; transition: box-shadow .2s; }
+    .chart-card:hover { box-shadow: 0 0 0 1px rgba(88,166,255,.4); }
+    .chart-card.fullscreen { position: fixed !important; inset: 0 !important; z-index: 1000 !important; border-radius: 0 !important; min-height: 100vh !important; }
+    .chart-card.fullscreen .chart-wrap { flex: 1; }
+
+    .chart-title { padding: 7px 10px; font-size: 12px; font-weight: 600; color: var(--text); background: var(--bg3); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 6px; flex-shrink: 0; min-height: 36px; }
+    .chart-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .chart-price { font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .chart-chg { font-size: 10px; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .chart-chg.up { color: var(--green); } .chart-chg.down { color: var(--red); }
+
+    .mkt-badge { font-size: 8px; font-weight: 700; padding: 1px 5px; border-radius: 3px; text-transform: uppercase; white-space: nowrap; }
+    .mkt-badge.regular { background: rgba(63,185,80,.2); color: var(--green); }
+    .mkt-badge.pre     { background: rgba(88,166,255,.15); color: var(--accent); }
+    .mkt-badge.post    { background: rgba(240,136,62,.15); color: #f0883e; }
+    .mkt-badge.closed  { background: var(--bg); color: var(--text2); }
+
+    .title-actions { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+    .act-btn { background: none; border: none; color: var(--text2); cursor: pointer; font-size: 13px; padding: 2px 3px; border-radius: 3px; line-height: 1; transition: color .15s; }
+    .act-btn:hover { color: var(--text); background: var(--border); }
+
+    .chart-wrap { flex: 1; position: relative; }
+    .chart-wrap iframe, .chart-wrap > div { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+    .candle-timer { position: absolute !important; inset: auto !important; width: auto !important; height: auto !important;
+      bottom: 36px; right: 4px; z-index: 10;
+      font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums;
+      font-family: ui-monospace, monospace; color: #d1d5db;
+      background: #131722; border: 1px solid #363a45; border-radius: 3px;
+      padding: 2px 6px; pointer-events: none; }
+
+    /* ── Bottom panel ── */
+    .bottom-panel { display: flex; gap: 10px; padding: 0 10px 10px; min-height: 300px; }
+    .panel-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
+    .panel-box.calendar { flex: 1; }
+    .panel-head { padding: 7px 12px; font-size: 11px; font-weight: 700; color: var(--text); background: var(--bg3); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: .5px; flex-shrink: 0; }
+    .panel-body { flex: 1; overflow: hidden; }
+
+    /* ── Alerts modal ── */
+    .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 2000; align-items: center; justify-content: center; }
+    .modal-backdrop.show { display: flex; }
+    .modal { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; width: 400px; max-width: 95vw; max-height: 85vh; overflow-y: auto; }
+    .modal-hd { display: flex; align-items: center; justify-content: space-between; padding: 13px 16px; border-bottom: 1px solid var(--border); }
+    .modal-hd h3 { font-size: 14px; font-weight: 700; }
+    .modal-x { background: none; border: none; color: var(--text2); font-size: 17px; cursor: pointer; }
+    .modal-x:hover { color: var(--text); }
+    .modal-bd { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+    .al-form { display: flex; flex-direction: column; gap: 8px; }
+    .al-row { display: flex; gap: 7px; }
+    .al-form select, .al-form input { background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 6px 9px; border-radius: 5px; font-size: 12px; width: 100%; }
+    .al-row select, .al-row input { flex: 1; }
+    .btn-primary { background: #1f6feb; border: 1px solid #388bfd; color: #fff; padding: 7px; border-radius: 5px; font-size: 12px; font-weight: 600; cursor: pointer; width: 100%; }
+    .btn-primary:hover { background: #388bfd; }
+    .al-list { display: flex; flex-direction: column; gap: 6px; }
+    .al-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; background: var(--bg3); border: 1px solid var(--border); border-radius: 5px; font-size: 11px; }
+    .al-sym { font-weight: 700; color: var(--accent); }
+    .al-cond { color: var(--text2); }
+    .al-price { font-variant-numeric: tabular-nums; font-weight: 600; }
+    .al-del { margin-left: auto; background: none; border: none; color: var(--text2); cursor: pointer; }
+    .al-del:hover { color: var(--red); }
+    .no-al { color: var(--text2); font-size: 11px; text-align: center; padding: 16px; }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 18px; right: 18px; background: var(--bg2); border: 1px solid var(--accent); border-radius: 8px; padding: 10px 14px; font-size: 12px; z-index: 3000; max-width: 280px; box-shadow: 0 4px 20px rgba(0,0,0,.4); animation: slideIn .3s ease; }
+    @keyframes slideIn { from{transform:translateX(120%)} to{transform:translateX(0)} }
+
+    footer { text-align: center; padding: 8px; font-size: 10px; color: var(--text2); border-top: 1px solid var(--border); }
+
+    @media (max-width: 900px) { .grid { grid-template-columns: repeat(2,1fr); } .bottom-panel { flex-direction: column; } }
+    @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header>
+  <div class="logo">Markets<span>Watch</span></div>
+  <div class="header-right">
+    <div class="tf-bar">
+      <span class="tf-label">TF</span>
+      <button class="tf-btn" data-tf="1">1m</button>
+      <button class="tf-btn" data-tf="5">5m</button>
+      <button class="tf-btn" data-tf="15">15m</button>
+      <button class="tf-btn" data-tf="30">30m</button>
+      <button class="tf-btn" data-tf="60">1H</button>
+      <button class="tf-btn" data-tf="240">4H</button>
+      <button class="tf-btn active" data-tf="D">1D</button>
+      <button class="tf-btn" data-tf="W">1W</button>
+      <button class="tf-btn" data-tf="M">1M</button>
+    </div>
+    <button class="icon-btn" id="alerts-btn">🔔 Alerts</button>
+    <button class="icon-btn" id="theme-btn">🌙 Theme</button>
+  </div>
+</header>
+
+<!-- ── Sessions bar ── -->
+<div class="sessions-bar">
+  <div class="session-card" id="sess-sydney">
+    <div class="session-dot"></div>
+    <div>
+      <div class="session-name">Sydney</div>
+      <div class="session-hours">22:00–07:00 UTC</div>
+    </div>
+    <div class="session-badge">closed</div>
+  </div>
+  <div class="session-card" id="sess-tokyo">
+    <div class="session-dot"></div>
+    <div>
+      <div class="session-name">Tokyo</div>
+      <div class="session-hours">00:00–09:00 UTC</div>
+    </div>
+    <div class="session-badge">closed</div>
+  </div>
+  <div class="session-card" id="sess-london">
+    <div class="session-dot"></div>
+    <div>
+      <div class="session-name">London</div>
+      <div class="session-hours">08:00–17:00 UTC</div>
+    </div>
+    <div class="session-badge">closed</div>
+  </div>
+  <div class="session-card" id="sess-newyork">
+    <div class="session-dot"></div>
+    <div>
+      <div class="session-name">New York</div>
+      <div class="session-hours">13:00–22:00 UTC</div>
+    </div>
+    <div class="session-badge">closed</div>
+  </div>
+
+  <!-- Crypto Fear & Greed -->
+  <div class="fng-pill">
+    <div>
+      <div class="fng-label">₿ Crypto F&amp;G</div>
+      <div class="fng-row">
+        <span class="fng-val" id="fng-val">--</span>
+        <span class="fng-cls" id="fng-cls">…</span>
+      </div>
+      <div class="fng-gauge"><div class="fng-gauge-fill" id="fng-fill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+
+  <div class="utc-clock" id="utc-clock">UTC <b>--:--:--</b></div>
+</div>
+
+<!-- ── Chart grid ── -->
+<div class="grid">
+
+  <div class="chart-card" id="card-BTCUSD">
+    <div class="chart-title">
+      <span class="chart-dot" style="background:#f7931a"></span>
+      BTC&nbsp;/&nbsp;USD
+      <span class="chart-price" id="price-BTCUSD"></span>
+      <span class="chart-chg"   id="chg-BTCUSD"></span>
+      <div class="title-actions">
+        <button class="act-btn" data-sym="BTCUSD" title="Set alert">🔔</button>
+        <button class="act-btn fullscreen-btn" data-card="card-BTCUSD" title="Fullscreen">⛶</button>
+      </div>
+    </div>
+    <div class="chart-wrap" id="wrap-BTCUSD">
+      <span class="candle-timer" id="timer-BTCUSD">--:--</span>
+    </div>
+  </div>
+
+  <div class="chart-card" id="card-ETHUSD">
+    <div class="chart-title">
+      <span class="chart-dot" style="background:#627eea"></span>
+      ETH&nbsp;/&nbsp;USD
+      <span class="chart-price" id="price-ETHUSD"></span>
+      <span class="chart-chg"   id="chg-ETHUSD"></span>
+      <div class="title-actions">
+        <button class="act-btn" data-sym="ETHUSD" title="Set alert">🔔</button>
+        <button class="act-btn fullscreen-btn" data-card="card-ETHUSD" title="Fullscreen">⛶</button>
+      </div>
+    </div>
+    <div class="chart-wrap" id="wrap-ETHUSD">
+      <span class="candle-timer" id="timer-ETHUSD">--:--</span>
+    </div>
+  </div>
+
+  <div class="chart-card" id="card-SPX">
+    <div class="chart-title">
+      <span class="chart-dot" style="background:#4caf50"></span>
+      S&amp;P&nbsp;500
+      <span class="chart-price" id="price-SPX"></span>
+      <span class="chart-chg"   id="chg-SPX"></span>
+      <div class="title-actions">
+        <span class="mkt-badge" id="status-SPX"></span>
+        <button class="act-btn" data-sym="SPX" title="Set alert">🔔</button>
+        <button class="act-btn fullscreen-btn" data-card="card-SPX" title="Fullscreen">⛶</button>
+      </div>
+    </div>
+    <div class="chart-wrap" id="wrap-SPX">
+      <span class="candle-timer" id="timer-SPX">--:--</span>
+    </div>
+  </div>
+
+  <div class="chart-card" id="card-NDX">
+    <div class="chart-title">
+      <span class="chart-dot" style="background:#2196f3"></span>
+      NASDAQ&nbsp;100
+      <span class="chart-price" id="price-NDX"></span>
+      <span class="chart-chg"   id="chg-NDX"></span>
+      <div class="title-actions">
+        <span class="mkt-badge" id="status-NDX"></span>
+        <button class="act-btn" data-sym="NDX" title="Set alert">🔔</button>
+        <button class="act-btn fullscreen-btn" data-card="card-NDX" title="Fullscreen">⛶</button>
+      </div>
+    </div>
+    <div class="chart-wrap" id="wrap-NDX">
+      <span class="candle-timer" id="timer-NDX">--:--</span>
+    </div>
+  </div>
+
+  <div class="chart-card" id="card-GOLD">
+    <div class="chart-title">
+      <span class="chart-dot" style="background:#ffd700"></span>
+      XAU&nbsp;/&nbsp;USD
+      <span class="chart-price" id="price-GOLD"></span>
+      <span class="chart-chg"   id="chg-GOLD"></span>
+      <div class="title-actions">
+        <button class="act-btn" data-sym="GOLD" title="Set alert">🔔</button>
+        <button class="act-btn fullscreen-btn" data-card="card-GOLD" title="Fullscreen">⛶</button>
+      </div>
+    </div>
+    <div class="chart-wrap" id="wrap-GOLD">
+      <span class="candle-timer" id="timer-GOLD">--:--</span>
+    </div>
+  </div>
+
+  <div class="chart-card" id="card-DXY">
+    <div class="chart-title">
+      <span class="chart-dot" style="background:#ff5722"></span>
+      DXY
+      <span class="chart-price" id="price-DXY"></span>
+      <span class="chart-chg"   id="chg-DXY"></span>
+      <div class="title-actions">
+        <button class="act-btn" data-sym="DXY" title="Set alert">🔔</button>
+        <button class="act-btn fullscreen-btn" data-card="card-DXY" title="Fullscreen">⛶</button>
+      </div>
+    </div>
+    <div class="chart-wrap" id="wrap-DXY">
+      <span class="candle-timer" id="timer-DXY">--:--</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Bottom panel: Economic Calendar ── -->
+<div class="bottom-panel">
+  <div class="panel-box calendar">
+    <div class="panel-head">📅 Economic Calendar</div>
+    <div class="panel-body" id="econ-cal"></div>
+  </div>
+</div>
+
+<!-- ── Alerts modal ── -->
+<div class="modal-backdrop" id="alerts-modal">
+  <div class="modal">
+    <div class="modal-hd">
+      <h3>🔔 Price Alerts</h3>
+      <button class="modal-x" id="modal-close">✕</button>
+    </div>
+    <div class="modal-bd">
+      <div class="al-form">
+        <div class="al-row">
+          <select id="al-sym">
+            <option value="BTCUSD">BTC / USD</option>
+            <option value="ETHUSD">ETH / USD</option>
+            <option value="SPX">S&amp;P 500</option>
+            <option value="NDX">NASDAQ 100</option>
+            <option value="GOLD">XAU / USD</option>
+            <option value="DXY">DXY</option>
+          </select>
+          <select id="al-dir">
+            <option value="above">Crosses Above ↑</option>
+            <option value="below">Crosses Below ↓</option>
+          </select>
+        </div>
+        <input type="number" id="al-price" placeholder="Price level  e.g. 95000" step="any" />
+        <button class="btn-primary" id="al-add-btn">Add Alert</button>
+      </div>
+      <div class="al-list" id="al-list"></div>
+    </div>
+  </div>
+</div>
+
+<footer>Powered by TradingView &nbsp;·&nbsp; Prices via CoinGecko &amp; Yahoo Finance &nbsp;·&nbsp; Not financial advice</footer>
+
+<script>
+// ── Config ────────────────────────────────────────────────────
+const CHARTS = [
+  { id:"BTCUSD", symbol:"COINBASE:BTCUSD",  yahoo:"BTC-USD"   },
+  { id:"ETHUSD", symbol:"COINBASE:ETHUSD",  yahoo:"ETH-USD"   },
+  { id:"SPX",    symbol:"VANTAGE:SP500",    yahoo:"^GSPC"     },
+  { id:"NDX",    symbol:"VANTAGE:NAS100",   yahoo:"^NDX"      },
+  { id:"GOLD",   symbol:"TVC:GOLD",         yahoo:"GC=F"      },
+  { id:"DXY",    symbol:"CAPITALCOM:DXY",   yahoo:"DX-Y.NYB"  },
+];
+
+let currentTf   = "D";
+let isDark      = true;
+let lastPrices  = {};
+
+// ── Theme ─────────────────────────────────────────────────────
+document.getElementById("theme-btn").addEventListener("click", () => {
+  isDark = !isDark;
+  document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
+  document.getElementById("theme-btn").textContent = isDark ? "🌙 Theme" : "☀️ Theme";
+  renderAll(currentTf); // rebuild charts with correct theme
+});
+
+// ── TradingView widgets ───────────────────────────────────────
+function buildWidget(id, symbol, interval) {
+  const wrap = document.getElementById("wrap-" + id);
+  const old  = document.getElementById("tv_" + id);
+  if (old) old.remove();
+
+  const div = document.createElement("div");
+  div.id = "tv_" + id;
+  div.style.cssText = "position:absolute;inset:0;width:100%;height:100%;";
+  wrap.insertBefore(div, wrap.firstChild);
+
+  new TradingView.widget({
+    autosize: true, symbol, interval,
+    timezone: "Etc/UTC",
+    theme: isDark ? "dark" : "light",
+    style: "1", locale: "en",
+    toolbar_bg: isDark ? "#1c2128" : "#f0f2f5",
+    enable_publishing: false,
+    hide_top_toolbar: false, hide_legend: false, hide_side_toolbar: true,
+    allow_symbol_change: true, save_image: false,
+    disabled_features: ["create_volume_indicator_by_default"],
+    container_id: "tv_" + id,
+    backgroundColor: isDark ? "rgba(13,17,23,1)" : "rgba(246,248,250,1)",
+    gridColor:       isDark ? "rgba(48,54,61,.5)" : "rgba(208,215,222,.5)",
+  });
+}
+
+function renderAll(tf) {
+  currentTf = tf;
+  CHARTS.forEach(c => buildWidget(c.id, c.symbol, tf));
+}
+
+document.querySelectorAll(".tf-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tf-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    renderAll(btn.dataset.tf);
+    startTimer();
+  });
+});
+
+// ── Fullscreen ────────────────────────────────────────────────
+document.querySelectorAll(".fullscreen-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const card = document.getElementById(btn.dataset.card);
+    const on   = card.classList.toggle("fullscreen");
+    btn.textContent = on ? "✕" : "⛶";
+    btn.title       = on ? "Exit fullscreen" : "Fullscreen";
+    document.body.style.overflow = on ? "hidden" : "";
+  });
+});
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  document.querySelectorAll(".chart-card.fullscreen").forEach(card => {
+    card.classList.remove("fullscreen");
+    const b = card.querySelector(".fullscreen-btn");
+    if (b) { b.textContent = "⛶"; b.title = "Fullscreen"; }
+  });
+  document.body.style.overflow = "";
+});
+
+// ── Sessions ─────────────────────────────────────────────────
+const SESSIONS = [
+  { id:"sess-sydney",  open:22, close:7  },
+  { id:"sess-tokyo",   open:0,  close:9  },
+  { id:"sess-london",  open:8,  close:17 },
+  { id:"sess-newyork", open:13, close:22 },
+];
+function sessionOpen(o, c, h, m) {
+  const t = h * 60 + m;
+  return o < c ? (t >= o*60 && t < c*60) : (t >= o*60 || t < c*60);
+}
+function tickSessions() {
+  const now = new Date();
+  const h = now.getUTCHours(), m = now.getUTCMinutes(), s = now.getUTCSeconds();
+  const p = n => String(n).padStart(2,"0");
+  document.querySelector("#utc-clock b").textContent = `${p(h)}:${p(m)}:${p(s)}`;
+  const wknd = now.getUTCDay() === 0 || now.getUTCDay() === 6;
+  SESSIONS.forEach(sess => {
+    const card  = document.getElementById(sess.id);
+    const badge = card.querySelector(".session-badge");
+    const open  = !wknd && sessionOpen(sess.open, sess.close, h, m);
+    card.classList.toggle("open", open);
+    badge.textContent = open ? "open" : "closed";
+  });
+}
+setInterval(tickSessions, 1000);
+tickSessions();
+
+// ── NYSE/NASDAQ status ────────────────────────────────────────
+function getETOffset() {
+  // US DST: 2nd Sun Mar → 1st Sun Nov
+  const now  = new Date();
+  const year = now.getUTCFullYear();
+  let cnt = 0, dstStart;
+  for (let d = 1; d <= 31; d++) {
+    if (new Date(Date.UTC(year, 2, d)).getUTCDay() === 0 && ++cnt === 2) {
+      dstStart = Date.UTC(year, 2, d, 7, 0, 0); break;
+    }
+  }
+  let dstEnd;
+  for (let d = 1; d <= 30; d++) {
+    if (new Date(Date.UTC(year, 10, d)).getUTCDay() === 0) {
+      dstEnd = Date.UTC(year, 10, d, 6, 0, 0); break;
+    }
+  }
+  const ts = now.getTime();
+  return (ts >= dstStart && ts < dstEnd) ? -4 : -5;
+}
+function nyStatus() {
+  const now = new Date();
+  if (now.getUTCDay() === 0 || now.getUTCDay() === 6) return "closed";
+  const off  = getETOffset();
+  const etH  = ((now.getUTCHours() + off) % 24 + 24) % 24;
+  const etM  = now.getUTCMinutes();
+  const mins = etH * 60 + etM;
+  if (mins >= 240 && mins < 570)  return "pre";
+  if (mins >= 570 && mins < 960)  return "regular";
+  if (mins >= 960 && mins < 1200) return "post";
+  return "closed";
+}
+function tickMarketStatus() {
+  const s = nyStatus();
+  const labels = { pre:"Pre-Market", regular:"Open", post:"After-Hours", closed:"Closed" };
+  ["SPX","NDX"].forEach(id => {
+    const el = document.getElementById("status-" + id);
+    if (el) { el.textContent = labels[s]; el.className = "mkt-badge " + s; }
+  });
+}
+setInterval(tickMarketStatus, 10000);
+tickMarketStatus();
+
+// ── Candle countdown ──────────────────────────────────────────
+function secsLeft(tf) {
+  const nowMs  = Date.now();
+  const nowSec = Math.floor(nowMs / 1000);
+  const map    = {"1":60,"5":300,"15":900,"30":1800,"60":3600,"240":14400};
+  if (map[tf]) { const d = map[tf]; return d - (nowSec % d); }
+  const now = new Date();
+  if (tf === "D") return Math.floor((new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()+1)) - nowMs) / 1000);
+  if (tf === "W") {
+    const day = now.getUTCDay(), d = day===0?1:8-day;
+    return Math.floor((new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()+d)) - nowMs) / 1000);
+  }
+  if (tf === "M") return Math.floor((new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth()+1, 1)) - nowMs) / 1000);
+  return null;
+}
+function fmtTime(s) {
+  if (s === null || s < 0) return "--:--";
+  const p = n => String(n).padStart(2,"0");
+  const d = Math.floor(s/86400), h = Math.floor((s%86400)/3600), m = Math.floor((s%3600)/60), sec = s%60;
+  if (d > 0) return `${d}d ${p(h)}:${p(m)}:${p(sec)}`;
+  if (h > 0) return `${p(h)}:${p(m)}:${p(sec)}`;
+  return `${p(m)}:${p(sec)}`;
+}
+let timerInt = null;
+function startTimer() {
+  if (timerInt) clearInterval(timerInt);
+  const tick = () => {
+    const lbl = fmtTime(secsLeft(currentTf));
+    CHARTS.forEach(c => { const el = document.getElementById("timer-"+c.id); if (el) el.textContent = lbl; });
+  };
+  tick(); timerInt = setInterval(tick, 1000);
+}
+
+// ── Live prices ───────────────────────────────────────────────
+function fmtPrice(p, id) {
+  if (p == null) return "";
+  if (id === "BTCUSD") return "$" + Math.round(p).toLocaleString("en-US");
+  if (id === "ETHUSD") return "$" + p.toLocaleString("en-US", {minimumFractionDigits:2, maximumFractionDigits:2});
+  return p.toLocaleString("en-US", {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function applyPrice(id, price, pct) {
+  const pEl = document.getElementById("price-" + id);
+  const cEl = document.getElementById("chg-"   + id);
+  if (pEl) pEl.textContent = fmtPrice(price, id);
+  if (cEl && pct != null) {
+    cEl.textContent = (pct >= 0 ? "+" : "") + pct.toFixed(2) + "%";
+    cEl.className   = "chart-chg " + (pct >= 0 ? "up" : "down");
+  }
+  if (price != null) lastPrices[id] = price;
+}
+
+async function fetchCrypto() {
+  try {
+    const r = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true");
+    const d = await r.json();
+    applyPrice("BTCUSD", d.bitcoin?.usd,  d.bitcoin?.usd_24h_change);
+    applyPrice("ETHUSD", d.ethereum?.usd, d.ethereum?.usd_24h_change);
+  } catch(e) { console.warn("CoinGecko:", e); }
+}
+
+async function fetchTraditional() {
+  try {
+    const syms   = "^GSPC,^NDX,GC=F,DX-Y.NYB";
+    const symMap = { "^GSPC":"SPX", "^NDX":"NDX", "GC=F":"GOLD", "DX-Y.NYB":"DXY" };
+    const proxy  = "https://api.allorigins.win/get?url=";
+    const yf     = encodeURIComponent(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms}&fields=regularMarketPrice,regularMarketChangePercent`);
+    const r      = await fetch(proxy + yf);
+    const j      = await r.json();
+    const data   = JSON.parse(j.contents);
+    (data.quoteResponse?.result || []).forEach(q => {
+      const id = symMap[q.symbol];
+      if (id) applyPrice(id, q.regularMarketPrice, q.regularMarketChangePercent);
+    });
+  } catch(e) { console.warn("Yahoo Finance:", e); }
+}
+
+
+function fetchPrices() { fetchCrypto(); fetchTraditional(); }
+
+// ── Fear & Greed ──────────────────────────────────────────────
+async function fetchFNG() {
+  try {
+    const r = await fetch("https://api.alternative.me/fng/?limit=1");
+    const d = await r.json();
+    const item = d.data?.[0]; if (!item) return;
+    const val = parseInt(item.value);
+    const cls = item.value_classification;
+    let color = val <= 25 ? "#f85149" : val <= 45 ? "#f0883e" : val <= 55 ? "#d29922" : val <= 75 ? "#3fb950" : "#58a6ff";
+    const vEl = document.getElementById("fng-val");
+    const cEl = document.getElementById("fng-cls");
+    const fEl = document.getElementById("fng-fill");
+    vEl.textContent = val;   vEl.style.color = color;
+    cEl.textContent = cls;   cEl.style.color = color;
+    fEl.style.width = val + "%";
+    fEl.style.background = color;
+  } catch(e) { console.warn("FNG:", e); }
+}
+
+// ── Alerts ────────────────────────────────────────────────────
+let alerts = JSON.parse(localStorage.getItem("mw_alerts") || "[]");
+const SYM_NAMES = { BTCUSD:"BTC/USD", ETHUSD:"ETH/USD", SPX:"S&P 500", NDX:"NASDAQ", GOLD:"XAU/USD", DXY:"DXY" };
+
+function saveAlerts()   { localStorage.setItem("mw_alerts", JSON.stringify(alerts)); }
+function renderAlerts() {
+  const list = document.getElementById("al-list");
+  if (!alerts.length) { list.innerHTML = '<div class="no-al">No alerts set</div>'; return; }
+  list.innerHTML = alerts.map((a, i) => `
+    <div class="al-item">
+      <span class="al-sym">${SYM_NAMES[a.sym]||a.sym}</span>
+      <span class="al-cond">${a.dir==="above"?"≥":"≤"}</span>
+      <span class="al-price">${a.price.toLocaleString()}</span>
+      <button class="al-del" data-i="${i}">✕</button>
+    </div>`).join("");
+  list.querySelectorAll(".al-del").forEach(b => b.addEventListener("click", () => {
+    alerts.splice(parseInt(b.dataset.i), 1); saveAlerts(); renderAlerts();
+  }));
+}
+
+document.getElementById("al-add-btn").addEventListener("click", () => {
+  const sym   = document.getElementById("al-sym").value;
+  const dir   = document.getElementById("al-dir").value;
+  const price = parseFloat(document.getElementById("al-price").value);
+  if (!price || price <= 0) return;
+  alerts.push({ sym, dir, price, id: Date.now() });
+  saveAlerts(); renderAlerts();
+  document.getElementById("al-price").value = "";
+});
+
+// Prefill from chart bell icon
+document.querySelectorAll(".act-btn[data-sym]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const sym = btn.dataset.sym;
+    if (!sym) return;
+    document.getElementById("al-sym").value = sym;
+    const p = lastPrices[sym];
+    if (p) document.getElementById("al-price").value = p.toFixed(2);
+    document.getElementById("alerts-modal").classList.add("show");
+    renderAlerts();
+  });
+});
+
+document.getElementById("alerts-btn").addEventListener("click", () => {
+  document.getElementById("alerts-modal").classList.add("show"); renderAlerts();
+});
+document.getElementById("modal-close").addEventListener("click", () => {
+  document.getElementById("alerts-modal").classList.remove("show");
+});
+document.getElementById("alerts-modal").addEventListener("click", e => {
+  if (e.target === e.currentTarget) e.currentTarget.classList.remove("show");
+});
+
+function showToast(msg) {
+  const t = document.createElement("div");
+  t.className = "toast"; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 5000);
+}
+function checkAlerts() {
+  let changed = false;
+  alerts = alerts.filter(a => {
+    const p = lastPrices[a.sym]; if (p == null) return true;
+    const hit = (a.dir==="above" && p >= a.price) || (a.dir==="below" && p <= a.price);
+    if (hit) {
+      showToast(`🔔 ${SYM_NAMES[a.sym]} ${a.dir==="above"?"≥":"≤"} ${a.price.toLocaleString()} · now ${p.toLocaleString()}`);
+      if (Notification.permission === "granted")
+        new Notification("MarketWatch", { body: `${SYM_NAMES[a.sym]} hit ${a.price.toLocaleString()}` });
+      changed = true; return false;
+    }
+    return true;
+  });
+  if (changed) saveAlerts();
+}
+if ("Notification" in window && Notification.permission === "default") Notification.requestPermission();
+
+// ── Economic Calendar ─────────────────────────────────────────
+function loadCalendar() {
+  const wrap = document.createElement("div");
+  wrap.className = "tradingview-widget-container";
+  wrap.style.height = "100%";
+  const inner = document.createElement("div");
+  inner.className = "tradingview-widget-container__widget";
+  inner.style.height = "100%";
+  wrap.appendChild(inner);
+  document.getElementById("econ-cal").appendChild(wrap);
+  const s = document.createElement("script");
+  s.type = "text/javascript";
+  s.src  = "https://s3.tradingview.com/external-embedding/embed-widget-events.js";
+  s.async = true;
+  s.innerHTML = JSON.stringify({
+    colorTheme: isDark ? "dark" : "light",
+    isTransparent: true,
+    width: "100%", height: "280",
+    locale: "en",
+    importanceFilter: "1",
+    currencyFilter: "USD"
+  });
+  wrap.appendChild(s);
+}
+
+// ── Boot ──────────────────────────────────────────────────────
+const tvScript = document.createElement("script");
+tvScript.src = "https://s3.tradingview.com/tv.js";
+tvScript.onload = () => { renderAll(currentTf); startTimer(); };
+document.head.appendChild(tvScript);
+
+fetchPrices();
+fetchFNG();
+loadCalendar();
+
+setInterval(fetchPrices,  15000);
+setInterval(checkAlerts,  15000);
+setInterval(fetchFNG,    300000);
+</script>
+
+</body>
+</html>
