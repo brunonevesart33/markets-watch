@@ -213,6 +213,66 @@
     .bte-stat-sub{font-size:10px;margin-top:2px;font-variant-numeric:tabular-nums;}
     .bte-stat-sub.up{color:var(--green);}.bte-stat-sub.down{color:var(--red);}.bte-stat-sub.neutral{color:var(--text2);}
 
+    /* ── Screener sort arrows ── */
+    .screener-head .sortable{cursor:pointer;user-select:none;transition:color .12s;}
+    .screener-head .sortable:hover{color:var(--text);}
+    .screener-head .sortable::after{content:" ⇅";opacity:.35;font-size:9px;}
+    .screener-head .sortable.sort-asc::after{content:" ↑";opacity:1;color:var(--accent);}
+    .screener-head .sortable.sort-desc::after{content:" ↓";opacity:1;color:var(--accent);}
+
+    /* ── Macro tab ── */
+    .macro-grid{display:grid;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,44vh);gap:10px;padding:10px;}
+
+    /* ── Watchlist tab ── */
+    .wl-wrap{display:flex;flex-direction:column;flex:1;overflow:hidden;}
+    .wl-toolbar{display:flex;align-items:center;gap:8px;padding:10px 18px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap;}
+    .wl-input{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;font-size:12px;width:160px;outline:none;text-transform:uppercase;letter-spacing:.5px;}
+    .wl-input:focus{border-color:var(--accent);}
+    .wl-hint{font-size:11px;color:var(--text2);}
+    .wl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;padding:12px 18px;overflow-y:auto;flex:1;align-content:start;}
+    .wl-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:5px;position:relative;transition:box-shadow .2s;}
+    .wl-card:hover{box-shadow:0 0 0 1px rgba(88,166,255,.3);}
+    .wl-sym{font-size:14px;font-weight:700;}
+    .wl-name{font-size:10px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .wl-price-row{display:flex;align-items:baseline;gap:6px;margin-top:3px;}
+    .wl-price{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;}
+    .wl-chg{font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;}
+    .wl-chg.up{color:var(--green);}.wl-chg.down{color:var(--red);}
+    .wl-remove{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--text2);cursor:pointer;font-size:13px;line-height:1;}
+    .wl-remove:hover{color:var(--red);}
+    .wl-empty{color:var(--text2);font-size:12px;padding:50px;text-align:center;grid-column:1/-1;}
+
+    /* ── Portfolio tab ── */
+    .pf-wrap{display:flex;flex-direction:column;flex:1;overflow:hidden;}
+    .pf-toolbar{display:flex;align-items:center;gap:7px;padding:10px 18px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap;}
+    .pf-input{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:6px 9px;border-radius:6px;font-size:12px;outline:none;}
+    .pf-input:focus{border-color:var(--accent);}
+    .pf-input.sym{width:90px;text-transform:uppercase;}
+    .pf-input.num{width:105px;}
+    .pf-summary{display:flex;gap:20px;padding:10px 20px;background:var(--bg);border-bottom:1px solid var(--border);flex-wrap:wrap;flex-shrink:0;}
+    .pf-kpi{display:flex;flex-direction:column;gap:2px;}
+    .pf-kpi-label{font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;}
+    .pf-kpi-val{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;}
+    .pf-kpi-val.up{color:var(--green);}.pf-kpi-val.down{color:var(--red);}
+    .pf-table-wrap{flex:1;overflow-y:auto;}
+    .pf-head,.pf-row{display:grid;grid-template-columns:1fr 80px 100px 100px 110px 110px 80px 32px;gap:8px;padding:8px 18px;align-items:center;}
+    .pf-head{background:var(--bg3);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:1;}
+    .pf-head span{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;}
+    .pf-row{border-bottom:1px solid rgba(48,54,61,.5);transition:background .1s;}
+    .pf-row:hover{background:var(--bg3);}
+    .pf-sym{font-size:13px;font-weight:700;}
+    .pf-cell{font-size:12px;font-variant-numeric:tabular-nums;text-align:right;}
+    .pf-pnl.up{color:var(--green);}.pf-pnl.down{color:var(--red);}
+    .pf-del{background:none;border:none;color:var(--text2);cursor:pointer;font-size:13px;text-align:center;}
+    .pf-del:hover{color:var(--red);}
+    .pf-empty{color:var(--text2);font-size:12px;padding:50px;text-align:center;}
+
+    /* ── Alert repeat badge ── */
+    .al-repeat-badge{font-size:9px;background:rgba(88,166,255,.15);color:var(--accent);border-radius:3px;padding:1px 5px;font-weight:700;}
+    .pop-pct-row{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:7px;}
+    .pop-pct{background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:5px;padding:5px 4px;font-size:11px;font-weight:600;cursor:pointer;}
+    .pop-pct:hover{border-color:var(--accent);color:var(--accent);}
+
     @media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr);}.bottom-panel{flex-direction:column;}.crypto-grid{grid-template-columns:36px 1fr 90px 70px 90px 130px;}.stocks-grid{grid-template-columns:36px 1fr 90px 70px 90px 110px;}.btceth-charts,.btceth-metrics{grid-template-columns:1fr;}.bte-stats{grid-template-columns:repeat(2,1fr);}}
     @media(max-width:560px){.grid{grid-template-columns:1fr;}}
   </style>
@@ -249,6 +309,9 @@
   <button class="tab-btn" data-tab="commodities">🛢 Commodities</button>
   <button class="tab-btn" data-tab="subcommodities">🌾 Sub Commodities</button>
   <button class="tab-btn" data-tab="btceth">₿ BTC / ETH</button>
+  <button class="tab-btn" data-tab="macro">📉 Macro</button>
+  <button class="tab-btn" data-tab="watchlist">⭐ Watchlist</button>
+  <button class="tab-btn" data-tab="portfolio">💼 Portfolio</button>
 </nav>
 
 <!-- ══════════════════ DASHBOARD TAB ══════════════════ -->
@@ -374,12 +437,12 @@
       <span class="screener-count" id="stocks-count">Loading…</span>
     </div>
     <div class="screener-table">
-      <div class="screener-head stocks-grid">
+      <div class="screener-head stocks-grid" id="stocks-head">
         <span>#</span>
         <span>Company</span>
-        <span style="text-align:right">Price</span>
-        <span style="text-align:right">24h</span>
-        <span style="text-align:right">Volume</span>
+        <span class="sortable" data-col="price" style="text-align:right">Price</span>
+        <span class="sortable" data-col="chg24" style="text-align:right">24h</span>
+        <span class="sortable" data-col="vol"   style="text-align:right">Volume</span>
         <span style="text-align:right">30d Chart</span>
       </div>
       <div class="screener-body" id="stocks-body">
@@ -397,14 +460,14 @@
       <span class="screener-count" id="crypto-count">Loading…</span>
     </div>
     <div class="screener-table">
-      <div class="screener-head crypto-grid">
+      <div class="screener-head crypto-grid" id="crypto-head">
         <span>#</span>
         <span>Coin</span>
-        <span style="text-align:right">Price</span>
-        <span style="text-align:right">24h</span>
-        <span style="text-align:right">7d</span>
-        <span style="text-align:right">Mkt Cap</span>
-        <span style="text-align:right">Volume</span>
+        <span class="sortable" data-col="price"  style="text-align:right">Price</span>
+        <span class="sortable" data-col="chg24"  style="text-align:right">24h</span>
+        <span class="sortable" data-col="chg7d"  style="text-align:right">7d</span>
+        <span class="sortable" data-col="mktcap" style="text-align:right">Mkt Cap</span>
+        <span class="sortable" data-col="vol"    style="text-align:right">Volume</span>
         <span style="text-align:right">7d Chart</span>
       </div>
       <div class="screener-body" id="crypto-body">
@@ -463,6 +526,51 @@
   </div>
 </div>
 
+<!-- ══════════════════ MACRO TAB ══════════════════ -->
+<div class="tab-panel" id="tab-macro">
+  <div class="macro-grid" id="macro-grid"></div>
+</div>
+
+<!-- ══════════════════ WATCHLIST TAB ══════════════════ -->
+<div class="tab-panel" id="tab-watchlist">
+  <div class="wl-wrap">
+    <div class="wl-toolbar">
+      <input class="wl-input" id="wl-input" type="text" placeholder="SYMBOL" maxlength="12" autocomplete="off" spellcheck="false" />
+      <button class="btn-primary" id="wl-add-btn" style="width:auto;padding:6px 14px">Add</button>
+      <span class="wl-hint">Enter any Yahoo Finance ticker (AAPL, BTC-USD, ^VIX, GC=F…)</span>
+    </div>
+    <div class="wl-grid" id="wl-grid">
+      <div class="wl-empty">No symbols yet. Add one above.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ PORTFOLIO TAB ══════════════════ -->
+<div class="tab-panel" id="tab-portfolio">
+  <div class="pf-wrap">
+    <div class="pf-toolbar">
+      <input class="pf-input sym" id="pf-sym"    type="text"   placeholder="SYMBOL" autocomplete="off" spellcheck="false" />
+      <input class="pf-input num" id="pf-shares"  type="number" placeholder="Shares / Units" min="0" step="any" />
+      <input class="pf-input num" id="pf-avg"     type="number" placeholder="Avg Buy Price $" min="0" step="any" />
+      <button class="btn-primary" id="pf-add-btn" style="width:auto;padding:6px 14px">Add Position</button>
+    </div>
+    <div class="pf-summary">
+      <div class="pf-kpi"><div class="pf-kpi-label">Invested</div><div class="pf-kpi-val" id="pf-total-cost">--</div></div>
+      <div class="pf-kpi"><div class="pf-kpi-label">Current Value</div><div class="pf-kpi-val" id="pf-total-val">--</div></div>
+      <div class="pf-kpi"><div class="pf-kpi-label">Total P&amp;L</div><div class="pf-kpi-val" id="pf-total-pnl">--</div></div>
+      <div class="pf-kpi"><div class="pf-kpi-label">Return</div><div class="pf-kpi-val" id="pf-total-pct">--</div></div>
+    </div>
+    <div class="pf-table-wrap">
+      <div class="pf-head">
+        <span>Symbol</span><span style="text-align:right">Shares</span><span style="text-align:right">Avg Price</span>
+        <span style="text-align:right">Cur Price</span><span style="text-align:right">Value</span>
+        <span style="text-align:right">P&amp;L $</span><span style="text-align:right">P&amp;L %</span><span></span>
+      </div>
+      <div id="pf-body"><div class="pf-empty">No positions yet.</div></div>
+    </div>
+  </div>
+</div>
+
 <!-- ── Inline alert popover ── -->
 <div class="alert-pop" id="alert-pop">
   <div class="pop-title">🔔 <span id="pop-sym-name"></span></div>
@@ -473,7 +581,17 @@
     <button class="pop-mini" type="button" data-step="1">+1</button>
     <button class="pop-mini" type="button" data-step="10">+10</button>
   </div>
+  <div class="pop-pct-row">
+    <button class="pop-pct" type="button" data-pct="-5">-5%</button>
+    <button class="pop-pct" type="button" data-pct="-2">-2%</button>
+    <button class="pop-pct" type="button" data-pct="2">+2%</button>
+    <button class="pop-pct" type="button" data-pct="5">+5%</button>
+  </div>
   <input type="number" id="pop-price" step="any" placeholder="Price level" />
+  <div style="display:flex;align-items:center;gap:6px;margin-bottom:7px">
+    <input type="checkbox" id="pop-repeat" style="cursor:pointer" />
+    <label for="pop-repeat" style="font-size:11px;color:var(--text2);cursor:pointer">Repeat after trigger</label>
+  </div>
   <button class="btn-primary" id="pop-add-btn">Add Alert</button>
 </div>
 
@@ -497,6 +615,10 @@
           </select>
         </div>
         <input type="number" id="al-price" placeholder="Price level  e.g. 95000" step="any" />
+        <div style="display:flex;align-items:center;gap:6px">
+          <input type="checkbox" id="al-repeat" style="cursor:pointer" />
+          <label for="al-repeat" style="font-size:11px;color:var(--text2);cursor:pointer">Repeat after trigger</label>
+        </div>
         <button class="btn-primary" id="al-add-btn">Add Alert</button>
       </div>
       <div class="al-status" id="al-status">Alerts are checked when live prices update.</div>
@@ -567,6 +689,9 @@ let forexLoaded = false;
 let commoditiesLoaded = false;
 let subCommoditiesLoaded = false;
 let btcethLoaded = false;
+let macroLoaded = false;
+let wlLoaded = false;
+let pfLoaded = false;
 
 // ══════════════════════════════════════════════════════════════
 //  TABS
@@ -579,14 +704,17 @@ document.querySelectorAll(".tab-btn").forEach(btn => {
     btn.classList.add("active");
     document.getElementById("tab-" + tab).classList.add("active");
     // Show TF bar on chart tabs
-    document.getElementById("tf-bar").style.display = ["dashboard","forex","commodities","subcommodities","btceth"].includes(tab) ? "flex" : "none";
-    // Lazy-load screeners on first visit
-    if (tab === "stocks"      && !stocksLoaded)      { stocksLoaded = true;      loadStocks(); }
-    if (tab === "crypto"      && !cryptoLoaded)      { cryptoLoaded = true;      loadCrypto(); }
-    if (tab === "forex"       && !forexLoaded)       { forexLoaded = true;       loadForex(); }
+    document.getElementById("tf-bar").style.display = ["dashboard","forex","commodities","subcommodities","btceth","macro"].includes(tab) ? "flex" : "none";
+    // Lazy-load on first visit
+    if (tab === "stocks"         && !stocksLoaded)         { stocksLoaded = true;         loadStocks(); }
+    if (tab === "crypto"         && !cryptoLoaded)         { cryptoLoaded = true;         loadCrypto(); }
+    if (tab === "forex"          && !forexLoaded)          { forexLoaded = true;          loadForex(); }
     if (tab === "commodities"    && !commoditiesLoaded)    { commoditiesLoaded = true;    loadCommodities(); }
     if (tab === "subcommodities" && !subCommoditiesLoaded) { subCommoditiesLoaded = true; loadSubCommodities(); }
     if (tab === "btceth"         && !btcethLoaded)         { btcethLoaded = true;         loadBtcEth(); }
+    if (tab === "macro"          && !macroLoaded)          { macroLoaded = true;          loadMacro(); }
+    if (tab === "watchlist"      && !wlLoaded)             { wlLoaded = true;             loadWatchlist(); }
+    if (tab === "portfolio"      && !pfLoaded)             { pfLoaded = true;             loadPortfolio(); }
   });
 });
 
@@ -602,6 +730,7 @@ document.getElementById("theme-btn").addEventListener("click", () => {
   if (commoditiesLoaded)    renderCommodities(currentTf);
   if (subCommoditiesLoaded) renderSubCommodities(currentTf);
   if (btcethLoaded)         renderBtcEth(currentTf);
+  if (macroLoaded)          renderMacro(currentTf);
 });
 
 // ══════════════════════════════════════════════════════════════
@@ -641,6 +770,7 @@ document.querySelectorAll(".tf-btn").forEach(btn => {
     if (commoditiesLoaded)    renderCommodities(btn.dataset.tf);
     if (subCommoditiesLoaded) renderSubCommodities(btn.dataset.tf);
     if (btcethLoaded)         renderBtcEth(btn.dataset.tf);
+    if (macroLoaded)          renderMacro(btn.dataset.tf);
     startTimer();
     btn.blur();
   });
@@ -951,6 +1081,9 @@ async function drainQueue() {
       const nameEl = row.querySelector(".sr-name-full");
       if (nameEl && name) nameEl.textContent = name;
       row.dataset.search = ((name || sym) + " " + sym).toLowerCase();
+      if (price  != null) row.dataset.price = price;
+      if (chgPct != null) row.dataset.chg24 = chgPct;
+      if (vol    != null) row.dataset.vol   = vol;
 
       const priceEl = row.querySelector(".sr-price");
       if (priceEl) priceEl.textContent = fmtPx(price);
@@ -1185,6 +1318,11 @@ async function loadCrypto() {
       const row = document.createElement("div");
       row.className = "screener-row crypto-grid";
       row.dataset.search = (coin.name + " " + coin.symbol).toLowerCase();
+      row.dataset.price  = coin.current_price || 0;
+      row.dataset.chg24  = coin.price_change_percentage_24h || 0;
+      row.dataset.chg7d  = coin.price_change_percentage_7d_in_currency || 0;
+      row.dataset.mktcap = coin.market_cap || 0;
+      row.dataset.vol    = coin.total_volume || 0;
 
       const canvas = makeCanvas();
 
@@ -1327,6 +1465,7 @@ const SYM_NAMES = {
   COM_NG:"Natural Gas", COM_COPPER:"Copper", COM_WHEAT:"Wheat", COM_CORN:"Corn",
   SUB_PLATINUM:"Platinum", SUB_PALLADIUM:"Palladium", SUB_COCOA:"Cocoa",
   SUB_COFFEE:"Coffee", SUB_SUGAR:"Sugar", SUB_COTTON:"Cotton", SUB_SOYBEANS:"Soybeans",
+  MACRO_VIX:"VIX", MACRO_US10Y:"US 10Y Yield", MACRO_US02Y:"US 2Y Yield", MACRO_US30Y:"US 30Y Yield",
 };
 
 const ALERT_INSTRUMENTS = [
@@ -1334,6 +1473,7 @@ const ALERT_INSTRUMENTS = [
   ...FOREX_PAIRS.map(p => ({id:p.id, yfSym:p.yfSym, name:p.name})),
   ...COMMODITIES_LIST.map(c => ({id:c.id, yfSym:c.yfSym, name:c.name})),
   ...SUB_COMMODITIES_LIST.map(c => ({id:c.id, yfSym:c.yfSym, name:c.name})),
+  ...MACRO_LIST.map(m => ({id:m.id, yfSym:m.yfSym, name:m.name})),
 ];
 const ALERT_FEEDS = Object.fromEntries(ALERT_INSTRUMENTS.map(i => [i.id, i]));
 const ALERT_IDS_BY_YF = Object.fromEntries(ALERT_INSTRUMENTS.map(i => [i.yfSym, i.id]));
@@ -1347,12 +1487,11 @@ function renderAlertSymbolOptions() {
     .join("");
 }
 
-function makeAlert(sym, price) {
+function makeAlert(sym, price, repeat=false) {
   const cur = Number(lastPrices[sym]);
   const hasCur = Number.isFinite(cur);
   return {
-    sym,
-    price,
+    sym, price, repeat,
     startSide: hasCur ? (cur < price ? "below" : cur > price ? "above" : "at") : null,
     lastPrice: hasCur ? cur : null,
     id: Date.now() + Math.floor(Math.random() * 1000),
@@ -1399,6 +1538,7 @@ function renderAlerts(){
       <span class="al-sym">${SYM_NAMES[a.sym]||a.sym}</span>
       <span class="al-cond">target</span>
       <span class="al-price">${a.price.toLocaleString()}</span>
+      ${a.repeat ? '<span class="al-repeat-badge">REPEAT</span>' : ''}
       <button class="al-del" data-i="${i}">✕</button>
     </div>`).join("");
   list.querySelectorAll(".al-del").forEach(b=>b.addEventListener("click",()=>{alerts.splice(parseInt(b.dataset.i),1);saveAlerts();renderAlerts();}));
@@ -1406,8 +1546,9 @@ function renderAlerts(){
 document.getElementById("al-add-btn").addEventListener("click",()=>{
   const sym=document.getElementById("al-sym").value;
   const price=parseFloat(document.getElementById("al-price").value);
+  const repeat=document.getElementById("al-repeat").checked;
   if(!price||price<=0)return;
-  alerts.push(makeAlert(sym, price));
+  alerts.push(makeAlert(sym, price, repeat));
   requestAlertPermission();
   saveAlerts(); checkAlerts(); renderAlerts();
   document.getElementById("al-price").value="";
@@ -1486,6 +1627,17 @@ document.querySelectorAll("#alert-pop [data-step]").forEach(btn => {
   });
 });
 
+document.querySelectorAll("#alert-pop [data-pct]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const pop = document.getElementById("alert-pop");
+    const sym = pop._sym; if (!sym) return;
+    const cur = Number(lastPrices[sym]);
+    if (!Number.isFinite(cur)) return;
+    setPopPrice(sym, cur * (1 + Number(btn.dataset.pct) / 100));
+    document.getElementById("pop-price").focus();
+  });
+});
+
 document.getElementById("pop-price").addEventListener("keydown", e => {
   if (e.key === "Enter") document.getElementById("pop-add-btn").click();
 });
@@ -1494,8 +1646,9 @@ document.getElementById("pop-add-btn").addEventListener("click", () => {
   const pop = document.getElementById("alert-pop");
   const sym = pop._sym; if (!sym) return;
   const price = parseFloat(document.getElementById("pop-price").value);
+  const repeat = document.getElementById("pop-repeat").checked;
   if (!price || price <= 0) { document.getElementById("pop-price").focus(); return; }
-  alerts.push(makeAlert(sym, price));
+  alerts.push(makeAlert(sym, price, repeat));
   requestAlertPermission();
   saveAlerts();
   checkAlerts();
@@ -1565,7 +1718,9 @@ function checkAlerts(){
       showToast(`🔔 ${msg}`);
       showAlarmBanner("Price alert", msg);
       if("Notification" in window && Notification.permission==="granted")new Notification("MarketWatch",{body:`${name} hit ${level.toLocaleString()}`});
-      changed=true; return false;
+      changed=true;
+      if(a.repeat){a.startSide=null;a.lastPrice=null;return true;}
+      return false;
     }
     if(a.lastPrice!==p){a.lastPrice=p; changed=true;}
     return true;
@@ -1657,6 +1812,276 @@ async function fetchAlertPrices(){
   }).join(" | ");
   setAlertStatus(`Last alert check ${stamp}: ${updated}/${symbols.length} prices updated${failed ? `, ${failed} failed` : ""}. ${sample}`);
   checkAlerts();
+}
+
+// ══════════════════════════════════════════════════════════════
+//  MACRO TAB (VIX + BONDS)
+// ══════════════════════════════════════════════════════════════
+const MACRO_LIST = [
+  {id:"MACRO_VIX",   tvSym:"CBOE:VIX",  yfSym:"^VIX", name:"VIX",          color:"#e040fb", desc:"Fear Index"},
+  {id:"MACRO_US10Y", tvSym:"TVC:US10Y", yfSym:"^TNX", name:"US 10Y Yield", color:"#4fc3f7", desc:"Treasury"},
+  {id:"MACRO_US02Y", tvSym:"TVC:US02Y", yfSym:"^IRX", name:"US 2Y Yield",  color:"#81d4fa", desc:"Treasury"},
+  {id:"MACRO_US30Y", tvSym:"TVC:US30Y", yfSym:"^TYX", name:"US 30Y Yield", color:"#b3e5fc", desc:"Treasury"},
+];
+
+function loadMacro() {
+  const grid = document.getElementById("macro-grid");
+  grid.innerHTML = "";
+  MACRO_LIST.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "chart-card";
+    card.id = "card-" + item.id;
+    card.innerHTML = `
+      <div class="chart-title">
+        <span class="chart-dot" style="background:${item.color}"></span>
+        ${item.name}
+        <span style="font-size:9px;color:var(--text2);margin-left:2px">${item.desc}</span>
+        <span class="chart-price" id="price-${item.id}"></span>
+        <span class="chart-chg" id="chg-${item.id}"></span>
+        <div class="title-actions">
+          <button class="act-btn" data-sym="${item.id}" title="Set alert">🔔</button>
+          <button class="act-btn fullscreen-btn" data-card="card-${item.id}" title="Fullscreen">⛶</button>
+        </div>
+      </div>
+      <div class="chart-wrap" id="wrap-${item.id}">
+        <span class="candle-timer" id="timer-${item.id}">--:--</span>
+      </div>`;
+    grid.appendChild(card);
+    initChartOverlay(item.id);
+    buildWidget(item.id, item.tvSym, currentTf);
+    fetchStockData(item.yfSym).then(data => {
+      const meta = data.chart.result[0].meta;
+      const price = meta.regularMarketPrice, prev = meta.chartPreviousClose;
+      const pct = (price != null && prev) ? ((price - prev) / prev * 100) : null;
+      if (price != null) lastPrices[item.id] = price;
+      const pEl = document.getElementById("price-" + item.id);
+      const cEl = document.getElementById("chg-"   + item.id);
+      if (pEl) pEl.textContent = price != null ? price.toFixed(2) : "--";
+      if (cEl && pct != null) { cEl.textContent = (pct>=0?"+":"") + pct.toFixed(2) + "%"; cEl.className = "chart-chg " + (pct>=0?"up":"down"); }
+    }).catch(()=>{});
+  });
+}
+
+function renderMacro(tf) {
+  MACRO_LIST.forEach(m => buildWidget(m.id, m.tvSym, tf));
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SCREENER SORTING
+// ══════════════════════════════════════════════════════════════
+const _sortState = {};
+
+function sortScreener(bodyId, headId, colKey) {
+  const prev = _sortState[bodyId] || {col:null, dir:1};
+  const dir  = prev.col === colKey ? -prev.dir : -1;
+  _sortState[bodyId] = {col:colKey, dir};
+
+  document.querySelectorAll(`#${headId} .sortable`).forEach(s => s.classList.remove("sort-asc","sort-desc"));
+  const activeSpan = document.querySelector(`#${headId} [data-col="${colKey}"]`);
+  if (activeSpan) activeSpan.classList.add(dir === 1 ? "sort-asc" : "sort-desc");
+
+  const rows = [...document.querySelectorAll(`#${bodyId} .screener-row`)];
+  rows.sort((a,b) => dir * ((parseFloat(a.dataset[colKey])||0) - (parseFloat(b.dataset[colKey])||0)));
+  const body = document.getElementById(bodyId);
+  rows.forEach(r => body.appendChild(r));
+}
+
+function initSortHeaders() {
+  document.querySelectorAll("#crypto-head .sortable").forEach(span =>
+    span.addEventListener("click", () => sortScreener("crypto-body","crypto-head", span.dataset.col)));
+  document.querySelectorAll("#stocks-head .sortable").forEach(span =>
+    span.addEventListener("click", () => sortScreener("stocks-body","stocks-head", span.dataset.col)));
+}
+
+// ══════════════════════════════════════════════════════════════
+//  WATCHLIST TAB
+// ══════════════════════════════════════════════════════════════
+let watchlist = JSON.parse(localStorage.getItem("mw_watchlist") || "[]");
+
+function saveWatchlist() { localStorage.setItem("mw_watchlist", JSON.stringify(watchlist)); }
+
+function wlFmtPrice(p) {
+  if (p == null) return "--";
+  if (p >= 1000) return "$" + p.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+  if (p >= 1)    return "$" + p.toFixed(2);
+  if (p >= 0.01) return "$" + p.toFixed(4);
+  return "$" + p.toFixed(6);
+}
+
+async function fetchWlItem(sym) {
+  try {
+    const data   = await fetchStockData(sym);
+    const result = data.chart.result[0];
+    const meta   = result.meta;
+    const price  = meta.regularMarketPrice;
+    const prev   = meta.chartPreviousClose;
+    const pct    = (price != null && prev) ? ((price - prev) / prev * 100) : null;
+    const closes = result.indicators.quote[0].close;
+    const name   = meta.shortName || meta.longName || sym;
+    const nameEl  = document.getElementById("wl-name-"  + sym);
+    const priceEl = document.getElementById("wl-price-" + sym);
+    const chgEl   = document.getElementById("wl-chg-"   + sym);
+    const canvas  = document.getElementById("wl-canvas-"+ sym);
+    if (nameEl)  nameEl.textContent = name;
+    if (priceEl) priceEl.textContent = wlFmtPrice(price);
+    if (chgEl && pct != null) {
+      chgEl.textContent = (pct>=0?"+":"") + pct.toFixed(2) + "%";
+      chgEl.className = "wl-chg " + (pct>=0?"up":"down");
+    }
+    if (canvas && closes) drawSparkline(canvas, closes);
+  } catch(_) {
+    const nameEl = document.getElementById("wl-name-" + sym);
+    if (nameEl) nameEl.textContent = "Failed to load";
+  }
+}
+
+function renderWatchlist() {
+  const grid = document.getElementById("wl-grid");
+  if (!watchlist.length) {
+    grid.innerHTML = '<div class="wl-empty">No symbols yet.<br>Type a Yahoo Finance ticker above (e.g. AAPL, BTC-USD, ^VIX)</div>';
+    return;
+  }
+  const existing = new Map([...grid.querySelectorAll(".wl-card")].map(c => [c.dataset.sym, c]));
+  grid.innerHTML = "";
+  watchlist.forEach(item => {
+    let card = existing.get(item.sym);
+    if (!card) {
+      card = document.createElement("div");
+      card.className = "wl-card"; card.dataset.sym = item.sym;
+      card.innerHTML = `
+        <button class="wl-remove" data-sym="${item.sym}" title="Remove">✕</button>
+        <div class="wl-sym">${item.sym}</div>
+        <div class="wl-name" id="wl-name-${item.sym}">Loading…</div>
+        <div class="wl-price-row">
+          <span class="wl-price" id="wl-price-${item.sym}">--</span>
+          <span class="wl-chg"  id="wl-chg-${item.sym}"></span>
+        </div>
+        <canvas id="wl-canvas-${item.sym}" width="182" height="48" style="display:block;margin-top:4px"></canvas>`;
+      fetchWlItem(item.sym);
+    }
+    grid.appendChild(card);
+  });
+  grid.querySelectorAll(".wl-remove").forEach(btn =>
+    btn.addEventListener("click", () => {
+      watchlist = watchlist.filter(w => w.sym !== btn.dataset.sym);
+      saveWatchlist(); renderWatchlist();
+    }));
+}
+
+function loadWatchlist() {
+  renderWatchlist();
+  const input = document.getElementById("wl-input");
+  const addFn = () => {
+    const sym = input.value.trim().toUpperCase();
+    if (!sym) return;
+    if (watchlist.find(w => w.sym === sym)) { showToast("Already in watchlist"); return; }
+    watchlist.push({sym, addedAt:Date.now()});
+    saveWatchlist(); renderWatchlist();
+    input.value = "";
+  };
+  document.getElementById("wl-add-btn").addEventListener("click", addFn);
+  input.addEventListener("keydown", e => { if (e.key === "Enter") addFn(); });
+}
+
+// ══════════════════════════════════════════════════════════════
+//  PORTFOLIO TAB
+// ══════════════════════════════════════════════════════════════
+let portfolio = JSON.parse(localStorage.getItem("mw_portfolio") || "[]");
+let pfPrices  = {};
+
+function savePortfolio() { localStorage.setItem("mw_portfolio", JSON.stringify(portfolio)); }
+
+function fmtVal(n) {
+  if (n == null) return "--";
+  const abs = Math.abs(n);
+  const str = abs >= 1e12 ? (abs/1e12).toFixed(2)+"T"
+             : abs >= 1e9  ? (abs/1e9).toFixed(1)+"B"
+             : abs >= 1e6  ? (abs/1e6).toFixed(1)+"M"
+             : abs.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+  return (n < 0 ? "-$" : "$") + str;
+}
+
+async function fetchAllPfPrices() {
+  const syms = [...new Set(portfolio.map(p => p.sym))];
+  await Promise.all(syms.map(async sym => {
+    try {
+      const data  = await fetchStockData(sym);
+      const price = data.chart.result[0].meta.regularMarketPrice;
+      if (price != null) pfPrices[sym] = price;
+    } catch(_) {}
+  }));
+  renderPortfolio();
+}
+
+function renderPortfolio() {
+  const tbody = document.getElementById("pf-body");
+  if (!portfolio.length) {
+    tbody.innerHTML = '<div class="pf-empty">No positions yet. Add one above.</div>';
+    renderPfSummary(0, 0); return;
+  }
+  let totalCost = 0, totalVal = 0;
+  tbody.innerHTML = "";
+  portfolio.forEach(pos => {
+    const cur   = pfPrices[pos.sym];
+    const value = cur != null ? cur * pos.shares : null;
+    const cost  = pos.avgPrice * pos.shares;
+    const pnl   = value != null ? value - cost : null;
+    const pnlPct = pnl != null ? (pnl / cost * 100) : null;
+    totalCost += cost;
+    if (value != null) totalVal += value;
+    const cls = pnl == null ? "" : pnl >= 0 ? "up" : "down";
+    const row = document.createElement("div");
+    row.className = "pf-row";
+    row.innerHTML = `
+      <div class="pf-sym">${pos.sym}</div>
+      <div class="pf-cell">${pos.shares.toLocaleString()}</div>
+      <div class="pf-cell">${fmtPx(pos.avgPrice)}</div>
+      <div class="pf-cell">${cur != null ? fmtPx(cur) : "--"}</div>
+      <div class="pf-cell">${value != null ? fmtVal(value) : "--"}</div>
+      <div class="pf-cell pf-pnl ${cls}">${pnl != null ? (pnl>=0?"+":"")+fmtVal(pnl) : "--"}</div>
+      <div class="pf-cell pf-pnl ${cls}">${pnlPct != null ? (pnlPct>=0?"+":"")+pnlPct.toFixed(2)+"%" : "--"}</div>
+      <button class="pf-del" data-id="${pos.id}">✕</button>`;
+    tbody.appendChild(row);
+  });
+  tbody.querySelectorAll(".pf-del").forEach(btn =>
+    btn.addEventListener("click", () => {
+      portfolio = portfolio.filter(p => p.id !== Number(btn.dataset.id));
+      savePortfolio(); renderPortfolio();
+    }));
+  renderPfSummary(totalCost, totalVal);
+}
+
+function renderPfSummary(cost, val) {
+  const pnl    = val - cost;
+  const pnlPct = cost ? (pnl / cost * 100) : 0;
+  const cls    = pnl >= 0 ? "up" : "down";
+  document.getElementById("pf-total-cost").textContent = fmtVal(cost);
+  document.getElementById("pf-total-val").textContent  = fmtVal(val);
+  const pnlEl = document.getElementById("pf-total-pnl");
+  pnlEl.textContent = (pnl>=0?"+":"")+fmtVal(pnl); pnlEl.className = "pf-kpi-val " + cls;
+  const pctEl = document.getElementById("pf-total-pct");
+  pctEl.textContent = (pnlPct>=0?"+":"")+pnlPct.toFixed(2)+"%"; pctEl.className = "pf-kpi-val " + cls;
+}
+
+function loadPortfolio() {
+  renderPortfolio();
+  fetchAllPfPrices();
+  const addFn = () => {
+    const sym    = document.getElementById("pf-sym").value.trim().toUpperCase();
+    const shares = parseFloat(document.getElementById("pf-shares").value);
+    const avg    = parseFloat(document.getElementById("pf-avg").value);
+    if (!sym || !shares || !avg || shares <= 0 || avg <= 0) return;
+    portfolio.push({id:Date.now()+Math.random(), sym, shares, avgPrice:avg});
+    savePortfolio(); fetchAllPfPrices();
+    document.getElementById("pf-sym").value = "";
+    document.getElementById("pf-shares").value = "";
+    document.getElementById("pf-avg").value = "";
+    document.getElementById("pf-sym").focus();
+  };
+  document.getElementById("pf-add-btn").addEventListener("click", addFn);
+  document.getElementById("pf-sym").addEventListener("keydown",    e => { if(e.key==="Enter") document.getElementById("pf-shares").focus(); });
+  document.getElementById("pf-shares").addEventListener("keydown", e => { if(e.key==="Enter") document.getElementById("pf-avg").focus(); });
+  document.getElementById("pf-avg").addEventListener("keydown",    e => { if(e.key==="Enter") addFn(); });
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -1828,6 +2253,7 @@ function loadCalendar(){
 renderAlertSymbolOptions();
 CHARTS.forEach(c => initChartOverlay(c.id));
 renderChartAlertTags();
+initSortHeaders();
 
 const tvScript=document.createElement("script");
 tvScript.src="https://s3.tradingview.com/tv.js";
@@ -1839,6 +2265,7 @@ setInterval(fetchPrices, 15000);
 setInterval(fetchAlertPrices, 30000);
 setInterval(fetchFNG,   300000);
 setInterval(() => { if (btcethLoaded) fetchBtcEthMetrics(); }, 60000);
+setInterval(() => { if (pfLoaded) fetchAllPfPrices(); }, 60000);
 </script>
 </body>
 </html>
