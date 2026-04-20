@@ -193,7 +193,27 @@
 
     footer{text-align:center;padding:8px;font-size:10px;color:var(--text2);border-top:1px solid var(--border);}
 
-    @media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr);}.bottom-panel{flex-direction:column;}.crypto-grid{grid-template-columns:36px 1fr 90px 70px 90px 130px;}.stocks-grid{grid-template-columns:36px 1fr 90px 70px 90px 110px;}}
+    /* ── BTC/ETH Tab ── */
+    .btceth-wrap{display:flex;flex-direction:column;flex:1;overflow-y:auto;}
+    .btceth-charts{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 10px 6px;}
+    .btceth-charts .chart-card{height:48vh;}
+    .btceth-metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 10px 10px;}
+    .bte-block{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;}
+    .bte-coin-hd{display:flex;align-items:center;gap:8px;}
+    .bte-coin-name{font-size:13px;font-weight:700;}
+    .bte-chg-row{display:flex;gap:6px;flex-wrap:wrap;}
+    .bte-chg-pill{background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:4px 10px;font-size:11px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:56px;}
+    .bte-chg-pill .pill-label{font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;}
+    .bte-chg-pill .pill-val{font-variant-numeric:tabular-nums;}
+    .bte-chg-pill .pill-val.up{color:var(--green);}.bte-chg-pill .pill-val.down{color:var(--red);}
+    .bte-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+    .bte-stat{background:var(--bg3);border-radius:6px;padding:9px 10px;}
+    .bte-stat-label{font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
+    .bte-stat-val{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .bte-stat-sub{font-size:10px;margin-top:2px;font-variant-numeric:tabular-nums;}
+    .bte-stat-sub.up{color:var(--green);}.bte-stat-sub.down{color:var(--red);}.bte-stat-sub.neutral{color:var(--text2);}
+
+    @media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr);}.bottom-panel{flex-direction:column;}.crypto-grid{grid-template-columns:36px 1fr 90px 70px 90px 130px;}.stocks-grid{grid-template-columns:36px 1fr 90px 70px 90px 110px;}.btceth-charts,.btceth-metrics{grid-template-columns:1fr;}.bte-stats{grid-template-columns:repeat(2,1fr);}}
     @media(max-width:560px){.grid{grid-template-columns:1fr;}}
   </style>
 </head>
@@ -228,6 +248,7 @@
   <button class="tab-btn" data-tab="forex">💱 Forex</button>
   <button class="tab-btn" data-tab="commodities">🛢 Commodities</button>
   <button class="tab-btn" data-tab="subcommodities">🌾 Sub Commodities</button>
+  <button class="tab-btn" data-tab="btceth">₿ BTC / ETH</button>
 </nav>
 
 <!-- ══════════════════ DASHBOARD TAB ══════════════════ -->
@@ -408,6 +429,40 @@
   <div class="commodities-grid" id="subcommodities-grid"></div>
 </div>
 
+<!-- ══════════════════ BTC/ETH TAB ══════════════════ -->
+<div class="tab-panel" id="tab-btceth">
+  <div class="btceth-wrap">
+    <div class="btceth-charts">
+      <div class="chart-card" id="card-BTCUSD2">
+        <div class="chart-title">
+          <span class="chart-dot" style="background:#f7931a"></span>BTC&nbsp;/&nbsp;USD
+          <span class="chart-price" id="bte-price-BTC"></span><span class="chart-chg" id="bte-chg-BTC"></span>
+          <div class="title-actions">
+            <button class="act-btn" data-sym="BTCUSD" title="Set alert">🔔</button>
+            <button class="act-btn fullscreen-btn" data-card="card-BTCUSD2" title="Fullscreen">⛶</button>
+          </div>
+        </div>
+        <div class="chart-wrap" id="wrap-BTCUSD2"><span class="candle-timer" id="timer-BTCUSD2">--:--</span></div>
+      </div>
+      <div class="chart-card" id="card-ETHUSD2">
+        <div class="chart-title">
+          <span class="chart-dot" style="background:#627eea"></span>ETH&nbsp;/&nbsp;USD
+          <span class="chart-price" id="bte-price-ETH"></span><span class="chart-chg" id="bte-chg-ETH"></span>
+          <div class="title-actions">
+            <button class="act-btn" data-sym="ETHUSD" title="Set alert">🔔</button>
+            <button class="act-btn fullscreen-btn" data-card="card-ETHUSD2" title="Fullscreen">⛶</button>
+          </div>
+        </div>
+        <div class="chart-wrap" id="wrap-ETHUSD2"><span class="candle-timer" id="timer-ETHUSD2">--:--</span></div>
+      </div>
+    </div>
+    <div class="btceth-metrics" id="btceth-metrics">
+      <div class="bte-block"><div class="screener-loading">Loading BTC metrics…</div></div>
+      <div class="bte-block"><div class="screener-loading">Loading ETH metrics…</div></div>
+    </div>
+  </div>
+</div>
+
 <!-- ── Inline alert popover ── -->
 <div class="alert-pop" id="alert-pop">
   <div class="pop-title">🔔 <span id="pop-sym-name"></span></div>
@@ -511,6 +566,7 @@ let cryptoLoaded = false;
 let forexLoaded = false;
 let commoditiesLoaded = false;
 let subCommoditiesLoaded = false;
+let btcethLoaded = false;
 
 // ══════════════════════════════════════════════════════════════
 //  TABS
@@ -523,13 +579,14 @@ document.querySelectorAll(".tab-btn").forEach(btn => {
     btn.classList.add("active");
     document.getElementById("tab-" + tab).classList.add("active");
     // Show TF bar on chart tabs
-    document.getElementById("tf-bar").style.display = ["dashboard","forex","commodities","subcommodities"].includes(tab) ? "flex" : "none";
+    document.getElementById("tf-bar").style.display = ["dashboard","forex","commodities","subcommodities","btceth"].includes(tab) ? "flex" : "none";
     // Lazy-load screeners on first visit
     if (tab === "stocks"      && !stocksLoaded)      { stocksLoaded = true;      loadStocks(); }
     if (tab === "crypto"      && !cryptoLoaded)      { cryptoLoaded = true;      loadCrypto(); }
     if (tab === "forex"       && !forexLoaded)       { forexLoaded = true;       loadForex(); }
     if (tab === "commodities"    && !commoditiesLoaded)    { commoditiesLoaded = true;    loadCommodities(); }
     if (tab === "subcommodities" && !subCommoditiesLoaded) { subCommoditiesLoaded = true; loadSubCommodities(); }
+    if (tab === "btceth"         && !btcethLoaded)         { btcethLoaded = true;         loadBtcEth(); }
   });
 });
 
@@ -544,6 +601,7 @@ document.getElementById("theme-btn").addEventListener("click", () => {
   if (forexLoaded)          renderForex(currentTf);
   if (commoditiesLoaded)    renderCommodities(currentTf);
   if (subCommoditiesLoaded) renderSubCommodities(currentTf);
+  if (btcethLoaded)         renderBtcEth(currentTf);
 });
 
 // ══════════════════════════════════════════════════════════════
@@ -579,9 +637,10 @@ document.querySelectorAll(".tf-btn").forEach(btn => {
     document.querySelectorAll(".tf-btn").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     renderAll(btn.dataset.tf);
-    if (forexLoaded)       renderForex(btn.dataset.tf);
+    if (forexLoaded)          renderForex(btn.dataset.tf);
     if (commoditiesLoaded)    renderCommodities(btn.dataset.tf);
     if (subCommoditiesLoaded) renderSubCommodities(btn.dataset.tf);
+    if (btcethLoaded)         renderBtcEth(btn.dataset.tf);
     startTimer();
     btn.blur();
   });
@@ -1601,6 +1660,151 @@ async function fetchAlertPrices(){
 }
 
 // ══════════════════════════════════════════════════════════════
+//  BTC/ETH TAB
+// ══════════════════════════════════════════════════════════════
+const BTE_COINS = [
+  {id:"BTCUSD2", tvSym:"COINBASE:BTCUSD", cgId:"bitcoin",  metaId:"BTC"},
+  {id:"ETHUSD2", tvSym:"COINBASE:ETHUSD", cgId:"ethereum", metaId:"ETH"},
+];
+
+function loadBtcEth() {
+  BTE_COINS.forEach(c => {
+    initChartOverlay(c.id);
+    buildWidget(c.id, c.tvSym, currentTf);
+  });
+  fetchBtcEthMetrics();
+}
+
+function renderBtcEth(tf) {
+  BTE_COINS.forEach(c => buildWidget(c.id, c.tvSym, tf));
+}
+
+function fmtBteChg(v) {
+  if (v == null) return {cls:"", text:"--"};
+  return {cls: v >= 0 ? "up" : "down", text: (v >= 0 ? "+" : "") + v.toFixed(2) + "%"};
+}
+
+function renderBtcEthMetrics(btc, eth, btcDom, ethBtc) {
+  const el = document.getElementById("btceth-metrics");
+
+  const makeCoinBlock = (coin, isBtc) => {
+    if (!coin) return `<div class="bte-block"><div class="screener-loading">No data</div></div>`;
+    const color  = isBtc ? "#f7931a" : "#627eea";
+    const symbol = isBtc ? "BTC" : "ETH";
+    const ch1h  = fmtBteChg(coin.price_change_percentage_1h_in_currency);
+    const ch24  = fmtBteChg(coin.price_change_percentage_24h);
+    const ch7d  = fmtBteChg(coin.price_change_percentage_7d_in_currency);
+    const ch30d = fmtBteChg(coin.price_change_percentage_30d_in_currency);
+    const athChg = fmtBteChg(coin.ath_change_percentage);
+    const supply = coin.circulating_supply != null ? (coin.circulating_supply / 1e6).toFixed(3) + "M " + symbol : "--";
+    const maxSup = coin.max_supply != null ? (coin.max_supply / 1e6).toFixed(2) + "M" : "∞";
+    const extraLabel = isBtc ? "BTC Dominance" : "ETH / BTC";
+    const extraVal   = isBtc
+      ? (btcDom != null ? btcDom.toFixed(2) + "%" : "--")
+      : (ethBtc != null ? ethBtc.toFixed(6) : "--");
+
+    return `
+    <div class="bte-block">
+      <div class="bte-coin-hd">
+        <span class="chart-dot" style="background:${color};width:10px;height:10px"></span>
+        <span class="bte-coin-name">${coin.name} <span style="color:var(--text2);font-weight:400;font-size:11px">${symbol}</span></span>
+      </div>
+      <div class="bte-chg-row">
+        <div class="bte-chg-pill"><span class="pill-label">1h</span><span class="pill-val ${ch1h.cls}">${ch1h.text}</span></div>
+        <div class="bte-chg-pill"><span class="pill-label">24h</span><span class="pill-val ${ch24.cls}">${ch24.text}</span></div>
+        <div class="bte-chg-pill"><span class="pill-label">7d</span><span class="pill-val ${ch7d.cls}">${ch7d.text}</span></div>
+        <div class="bte-chg-pill"><span class="pill-label">30d</span><span class="pill-val ${ch30d.cls}">${ch30d.text}</span></div>
+      </div>
+      <div class="bte-stats">
+        <div class="bte-stat">
+          <div class="bte-stat-label">Market Cap</div>
+          <div class="bte-stat-val">${fmtN(coin.market_cap)}</div>
+        </div>
+        <div class="bte-stat">
+          <div class="bte-stat-label">24h Volume</div>
+          <div class="bte-stat-val">${fmtN(coin.total_volume)}</div>
+        </div>
+        <div class="bte-stat">
+          <div class="bte-stat-label">24h High</div>
+          <div class="bte-stat-val">${fmtPx(coin.high_24h)}</div>
+        </div>
+        <div class="bte-stat">
+          <div class="bte-stat-label">24h Low</div>
+          <div class="bte-stat-val">${fmtPx(coin.low_24h)}</div>
+        </div>
+        <div class="bte-stat">
+          <div class="bte-stat-label">Circulating</div>
+          <div class="bte-stat-val">${supply}</div>
+        </div>
+        <div class="bte-stat">
+          <div class="bte-stat-label">Max Supply</div>
+          <div class="bte-stat-val">${maxSup}</div>
+        </div>
+        <div class="bte-stat">
+          <div class="bte-stat-label">All-Time High</div>
+          <div class="bte-stat-val">${fmtPx(coin.ath)}</div>
+          <div class="bte-stat-sub ${athChg.cls}">${athChg.text} from ATH</div>
+        </div>
+        <div class="bte-stat">
+          <div class="bte-stat-label">${extraLabel}</div>
+          <div class="bte-stat-val">${extraVal}</div>
+        </div>
+      </div>
+    </div>`;
+  };
+
+  el.innerHTML = makeCoinBlock(btc, true) + makeCoinBlock(eth, false);
+}
+
+async function fetchBtcEthMetrics() {
+  try {
+    const cgUrl = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum&order=market_cap_desc&price_change_percentage=1h,24h,7d,30d";
+    let coins;
+    try {
+      const r = await fetch(cgUrl); if (!r.ok) throw new Error("direct");
+      coins = await r.json();
+    } catch(_) {
+      const r = await fetch(PROXY + encodeURIComponent(cgUrl));
+      coins = await r.json();
+    }
+
+    let btcDom = null;
+    try {
+      const gUrl = "https://api.coingecko.com/api/v3/global";
+      let gData;
+      try { const r = await fetch(gUrl); if (r.ok) gData = await r.json(); } catch(_) {}
+      if (!gData) { const r = await fetch(PROXY + encodeURIComponent(gUrl)); gData = await r.json(); }
+      btcDom = gData?.data?.market_cap_percentage?.btc;
+    } catch(_) {}
+
+    const btc = coins.find(c => c.id === "bitcoin");
+    const eth = coins.find(c => c.id === "ethereum");
+    const ethBtc = (btc?.current_price && eth?.current_price) ? eth.current_price / btc.current_price : null;
+
+    if (btc) {
+      document.getElementById("bte-price-BTC").textContent = fmtPx(btc.current_price);
+      const el = document.getElementById("bte-chg-BTC");
+      const ch = fmtBteChg(btc.price_change_percentage_24h);
+      el.textContent = ch.text; el.className = "chart-chg " + ch.cls;
+      lastPrices["BTCUSD"] = btc.current_price;
+    }
+    if (eth) {
+      document.getElementById("bte-price-ETH").textContent = fmtPx(eth.current_price);
+      const el = document.getElementById("bte-chg-ETH");
+      const ch = fmtBteChg(eth.price_change_percentage_24h);
+      el.textContent = ch.text; el.className = "chart-chg " + ch.cls;
+      lastPrices["ETHUSD"] = eth.current_price;
+    }
+
+    renderBtcEthMetrics(btc, eth, btcDom, ethBtc);
+  } catch(e) {
+    document.getElementById("btceth-metrics").innerHTML =
+      `<div class="bte-block"><div class="screener-loading">Failed to load metrics.</div></div>`;
+    console.warn("BTC/ETH metrics:", e);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
 //  ECONOMIC CALENDAR
 // ══════════════════════════════════════════════════════════════
 function loadCalendar(){
@@ -1634,6 +1838,7 @@ fetchPrices(); fetchAlertPrices(); fetchFNG(); loadCalendar();
 setInterval(fetchPrices, 15000);
 setInterval(fetchAlertPrices, 30000);
 setInterval(fetchFNG,   300000);
+setInterval(() => { if (btcethLoaded) fetchBtcEthMetrics(); }, 60000);
 </script>
 </body>
 </html>
