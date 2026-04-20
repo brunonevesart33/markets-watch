@@ -263,6 +263,10 @@
     .pf-del{background:none;border:none;color:var(--text2);cursor:pointer;font-size:13px;text-align:center;}
     .pf-del:hover{color:var(--red);}
     .pf-empty{color:var(--text2);font-size:12px;padding:50px;text-align:center;}
+    .pf-name{font-size:10px;color:var(--text2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .pf-badge{font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px;vertical-align:middle;margin-left:4px;}
+    .pf-badge.crypto{background:rgba(247,147,26,.15);color:#f7931a;}
+    .pf-badge.stock{background:rgba(63,185,80,.12);color:var(--green);}
 
     /* ── Alert repeat badge ── */
     .al-repeat-badge{font-size:9px;background:rgba(88,166,255,.15);color:var(--accent);border-radius:3px;padding:1px 5px;font-weight:700;}
@@ -540,7 +544,7 @@
 <div class="tab-panel" id="tab-portfolio">
   <div class="pf-wrap">
     <div class="pf-toolbar">
-      <input class="pf-input sym" id="pf-sym"    type="text"   placeholder="SYMBOL" autocomplete="off" spellcheck="false" />
+      <input class="pf-input sym" id="pf-sym"    type="text"   placeholder="AAPL, BTC, ETH…" autocomplete="off" spellcheck="false" />
       <input class="pf-input num" id="pf-shares"  type="number" placeholder="Shares / Units" min="0" step="any" />
       <input class="pf-input num" id="pf-avg"     type="number" placeholder="Avg Buy Price $" min="0" step="any" />
       <button class="btn-primary" id="pf-add-btn" style="width:auto;padding:6px 14px">Add Position</button>
@@ -669,6 +673,18 @@ const SUB_COMMODITIES_LIST = [
   {id:"SUB_COTTON",    tvSym:"PEPPERSTONE:COTTON",    yfSym:"CT=F",  name:"Cotton",    color:"#a8d8a8", mcap:"—"},
   {id:"SUB_SOYBEANS",  tvSym:"PEPPERSTONE:SOYBEANS",  yfSym:"ZS=F",  name:"Soybeans",  color:"#c8b560", mcap:"—"},
 ];
+
+const CRYPTO_CG_IDS = {
+  BTC:"bitcoin",ETH:"ethereum",BNB:"binancecoin",SOL:"solana",XRP:"ripple",
+  ADA:"cardano",DOGE:"dogecoin",TRX:"tron",TON:"the-open-network",AVAX:"avalanche-2",
+  SHIB:"shiba-inu",DOT:"polkadot",LINK:"chainlink",MATIC:"matic-network",
+  UNI:"uniswap",ATOM:"cosmos",LTC:"litecoin",BCH:"bitcoin-cash",NEAR:"near",
+  APT:"aptos",ARB:"arbitrum",OP:"optimism",SUI:"sui",PEPE:"pepe",
+  VET:"vechain",ALGO:"algorand",FTM:"fantom",SAND:"the-sandbox",
+  MANA:"decentraland",AXS:"axie-infinity",AAVE:"aave",MKR:"maker",
+  CRV:"curve-dao-token",COMP:"compound-governance-token",FIL:"filecoin",
+  ICP:"internet-computer",HBAR:"hedera-hashgraph",XLM:"stellar",
+};
 
 const PROXY = "https://corsproxy.io/?";
 let currentTf  = "60";
@@ -1920,7 +1936,8 @@ function loadWatchlist() {
 //  PORTFOLIO TAB
 // ══════════════════════════════════════════════════════════════
 let portfolio = JSON.parse(localStorage.getItem("mw_portfolio") || "[]");
-let pfPrices  = {};
+let pfPrices  = {};  // sym → current price
+let pfNames   = {};  // sym → display name
 
 function savePortfolio() { localStorage.setItem("mw_portfolio", JSON.stringify(portfolio)); }
 
@@ -1934,15 +1951,49 @@ function fmtVal(n) {
   return (n < 0 ? "-$" : "$") + str;
 }
 
+function isCrypto(sym) { return !!CRYPTO_CG_IDS[sym.toUpperCase()]; }
+
 async function fetchAllPfPrices() {
   const syms = [...new Set(portfolio.map(p => p.sym))];
-  await Promise.all(syms.map(async sym => {
+  if (!syms.length) { renderPortfolio(); return; }
+
+  const cryptoSyms = syms.filter(s => isCrypto(s));
+  const stockSyms  = syms.filter(s => !isCrypto(s));
+
+  // Batch fetch all crypto in one CoinGecko call
+  if (cryptoSyms.length) {
+    try {
+      const cgIds = cryptoSyms.map(s => CRYPTO_CG_IDS[s.toUpperCase()]).join(",");
+      const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${cgIds}&order=market_cap_desc`;
+      let coins;
+      try { const r = await fetch(url); if (r.ok) coins = await r.json(); } catch(_) {}
+      if (!coins) { const r = await fetch(PROXY + encodeURIComponent(url)); coins = await r.json(); }
+      if (Array.isArray(coins)) {
+        const byId = Object.fromEntries(coins.map(c => [c.id, c]));
+        cryptoSyms.forEach(s => {
+          const coin = byId[CRYPTO_CG_IDS[s.toUpperCase()]];
+          if (coin?.current_price != null) {
+            pfPrices[s] = coin.current_price;
+            pfNames[s]  = coin.name;
+          }
+        });
+      }
+    } catch(_) {}
+  }
+
+  // Fetch stocks individually from Yahoo Finance
+  await Promise.all(stockSyms.map(async sym => {
     try {
       const data  = await fetchStockData(sym);
-      const price = data.chart.result[0].meta.regularMarketPrice;
-      if (price != null) pfPrices[sym] = price;
+      const meta  = data.chart.result[0].meta;
+      const price = meta.regularMarketPrice;
+      if (price != null) {
+        pfPrices[sym] = price;
+        pfNames[sym]  = meta.shortName || meta.longName || sym;
+      }
     } catch(_) {}
   }));
+
   renderPortfolio();
 }
 
@@ -1962,14 +2013,19 @@ function renderPortfolio() {
     const pnlPct = pnl != null ? (pnl / cost * 100) : null;
     totalCost += cost;
     if (value != null) totalVal += value;
-    const cls = pnl == null ? "" : pnl >= 0 ? "up" : "down";
+    const cls    = pnl == null ? "" : pnl >= 0 ? "up" : "down";
+    const crypto = isCrypto(pos.sym);
+    const name   = pfNames[pos.sym] || pos.name || "";
     const row = document.createElement("div");
     row.className = "pf-row";
     row.innerHTML = `
-      <div class="pf-sym">${pos.sym}</div>
+      <div>
+        <div class="pf-sym">${pos.sym}<span class="pf-badge ${crypto?"crypto":"stock"}">${crypto?"CRYPTO":"STOCK"}</span></div>
+        ${name ? `<div class="pf-name">${name}</div>` : ""}
+      </div>
       <div class="pf-cell">${pos.shares.toLocaleString()}</div>
       <div class="pf-cell">${fmtPx(pos.avgPrice)}</div>
-      <div class="pf-cell">${cur != null ? fmtPx(cur) : "--"}</div>
+      <div class="pf-cell">${cur != null ? fmtPx(cur) : '<span style="color:var(--text2);font-size:11px">loading…</span>'}</div>
       <div class="pf-cell">${value != null ? fmtVal(value) : "--"}</div>
       <div class="pf-cell pf-pnl ${cls}">${pnl != null ? (pnl>=0?"+":"")+fmtVal(pnl) : "--"}</div>
       <div class="pf-cell pf-pnl ${cls}">${pnlPct != null ? (pnlPct>=0?"+":"")+pnlPct.toFixed(2)+"%" : "--"}</div>
@@ -2004,7 +2060,8 @@ function loadPortfolio() {
     const shares = parseFloat(document.getElementById("pf-shares").value);
     const avg    = parseFloat(document.getElementById("pf-avg").value);
     if (!sym || !shares || !avg || shares <= 0 || avg <= 0) return;
-    portfolio.push({id:Date.now()+Math.random(), sym, shares, avgPrice:avg});
+    const knownName = isCrypto(sym) ? (CRYPTO_CG_IDS[sym] ? sym : sym) : sym;
+    portfolio.push({id:Date.now()+Math.random(), sym, shares, avgPrice:avg, name: pfNames[sym] || ""});
     savePortfolio(); fetchAllPfPrices();
     document.getElementById("pf-sym").value = "";
     document.getElementById("pf-shares").value = "";
