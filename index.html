@@ -213,6 +213,10 @@
     .bte-stat-sub{font-size:10px;margin-top:2px;font-variant-numeric:tabular-nums;}
     .bte-stat-sub.up{color:var(--green);}.bte-stat-sub.down{color:var(--red);}.bte-stat-sub.neutral{color:var(--text2);}
 
+    /* ── Stocks chart grid ── */
+    .stocks-chart-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px;}
+    .stocks-chart-grid .chart-card{height:44vh;}
+
     /* ── Screener sort arrows ── */
     .screener-head .sortable{cursor:pointer;user-select:none;transition:color .12s;}
     .screener-head .sortable:hover{color:var(--text);}
@@ -431,25 +435,7 @@
 
 <!-- ══════════════════ STOCKS TAB ══════════════════ -->
 <div class="tab-panel" id="tab-stocks">
-  <div class="screener-wrap">
-    <div class="screener-toolbar">
-      <input class="screener-search" id="stocks-search" type="search" placeholder="Search stocks…" />
-      <span class="screener-count" id="stocks-count">Loading…</span>
-    </div>
-    <div class="screener-table">
-      <div class="screener-head stocks-grid" id="stocks-head">
-        <span>#</span>
-        <span>Company</span>
-        <span class="sortable" data-col="price" style="text-align:right">Price</span>
-        <span class="sortable" data-col="chg24" style="text-align:right">24h</span>
-        <span class="sortable" data-col="vol"   style="text-align:right">Volume</span>
-        <span style="text-align:right">30d Chart</span>
-      </div>
-      <div class="screener-body" id="stocks-body">
-        <div class="screener-loading">Loading top 20 stocks…</div>
-      </div>
-    </div>
-  </div>
+  <div class="stocks-chart-grid" id="stocks-grid"></div>
 </div>
 
 <!-- ══════════════════ CRYPTO TAB ══════════════════ -->
@@ -635,9 +621,27 @@ const CHARTS = [
   {id:"DXY",   symbol:"CAPITALCOM:DXY",  yahoo:"DX-Y.NYB"},
 ];
 
-const STOCKS_100 = [
-  "AAPL","MSFT","NVDA","AMZN","GOOGL","META","TSLA","AVGO","BRK-B","JPM",
-  "LLY","V","UNH","XOM","MA","COST","HD","PG","JNJ","ORCL"
+const STOCKS_LIST = [
+  {id:"STK_AAPL",  tvSym:"NASDAQ:AAPL",  yfSym:"AAPL",  name:"Apple",        color:"#555566"},
+  {id:"STK_MSFT",  tvSym:"NASDAQ:MSFT",  yfSym:"MSFT",  name:"Microsoft",    color:"#00a4ef"},
+  {id:"STK_NVDA",  tvSym:"NASDAQ:NVDA",  yfSym:"NVDA",  name:"NVIDIA",       color:"#76b900"},
+  {id:"STK_AMZN",  tvSym:"NASDAQ:AMZN",  yfSym:"AMZN",  name:"Amazon",       color:"#ff9900"},
+  {id:"STK_GOOGL", tvSym:"NASDAQ:GOOGL", yfSym:"GOOGL", name:"Alphabet",     color:"#4285f4"},
+  {id:"STK_META",  tvSym:"NASDAQ:META",  yfSym:"META",  name:"Meta",         color:"#1877f2"},
+  {id:"STK_TSLA",  tvSym:"NASDAQ:TSLA",  yfSym:"TSLA",  name:"Tesla",        color:"#e31937"},
+  {id:"STK_AVGO",  tvSym:"NASDAQ:AVGO",  yfSym:"AVGO",  name:"Broadcom",     color:"#cc0000"},
+  {id:"STK_BRKB",  tvSym:"NYSE:BRK.B",   yfSym:"BRK-B", name:"Berkshire B",  color:"#8B6914"},
+  {id:"STK_JPM",   tvSym:"NYSE:JPM",     yfSym:"JPM",   name:"JPMorgan",     color:"#005695"},
+  {id:"STK_LLY",   tvSym:"NYSE:LLY",     yfSym:"LLY",   name:"Eli Lilly",    color:"#e4003a"},
+  {id:"STK_V",     tvSym:"NYSE:V",       yfSym:"V",     name:"Visa",         color:"#1a1f71"},
+  {id:"STK_UNH",   tvSym:"NYSE:UNH",     yfSym:"UNH",   name:"UnitedHealth", color:"#316bbf"},
+  {id:"STK_XOM",   tvSym:"NYSE:XOM",     yfSym:"XOM",   name:"ExxonMobil",   color:"#e4003a"},
+  {id:"STK_MA",    tvSym:"NYSE:MA",      yfSym:"MA",    name:"Mastercard",   color:"#f79e1b"},
+  {id:"STK_COST",  tvSym:"NASDAQ:COST",  yfSym:"COST",  name:"Costco",       color:"#005daa"},
+  {id:"STK_HD",    tvSym:"NYSE:HD",      yfSym:"HD",    name:"Home Depot",   color:"#f96302"},
+  {id:"STK_PG",    tvSym:"NYSE:PG",      yfSym:"PG",    name:"P&G",          color:"#003087"},
+  {id:"STK_JNJ",   tvSym:"NYSE:JNJ",     yfSym:"JNJ",   name:"J&J",          color:"#cc0000"},
+  {id:"STK_ORCL",  tvSym:"NYSE:ORCL",    yfSym:"ORCL",  name:"Oracle",       color:"#f80000"},
 ];
 
 const FOREX_PAIRS = [
@@ -710,7 +714,7 @@ document.querySelectorAll(".tab-btn").forEach(btn => {
     btn.classList.add("active");
     document.getElementById("tab-" + tab).classList.add("active");
     // Show TF bar on chart tabs
-    document.getElementById("tf-bar").style.display = ["dashboard","forex","commodities","subcommodities","btceth"].includes(tab) ? "flex" : "none";
+    document.getElementById("tf-bar").style.display = ["dashboard","stocks","forex","commodities","subcommodities","btceth"].includes(tab) ? "flex" : "none";
     // Lazy-load on first visit
     if (tab === "stocks"         && !stocksLoaded)         { stocksLoaded = true;         loadStocks(); }
     if (tab === "crypto"         && !cryptoLoaded)         { cryptoLoaded = true;         loadCrypto(); }
@@ -734,6 +738,7 @@ document.getElementById("theme-btn").addEventListener("click", () => {
   if (forexLoaded)          renderForex(currentTf);
   if (commoditiesLoaded)    renderCommodities(currentTf);
   if (subCommoditiesLoaded) renderSubCommodities(currentTf);
+  if (stocksLoaded)         renderStocks(currentTf);
   if (btcethLoaded)         renderBtcEth(currentTf);
 });
 
@@ -773,6 +778,7 @@ document.querySelectorAll(".tf-btn").forEach(btn => {
     if (forexLoaded)          renderForex(btn.dataset.tf);
     if (commoditiesLoaded)    renderCommodities(btn.dataset.tf);
     if (subCommoditiesLoaded) renderSubCommodities(btn.dataset.tf);
+    if (stocksLoaded)         renderStocks(btn.dataset.tf);
     if (btcethLoaded)         renderBtcEth(btn.dataset.tf);
     startTimer();
     btn.blur();
@@ -1016,13 +1022,54 @@ function makeCanvas() {
 //  STOCKS SCREENER
 // ══════════════════════════════════════════════════════════════
 // Sparkline + price fetch with concurrency limit and retry
-let sparkQueue = [], activeSparkFetches = 0;
-const MAX_SPARK = 4;
-
-function queueSparkline(sym, canvas, row) {
-  sparkQueue.push({sym, canvas, row, retries: 0});
-  drainQueue();
+// ══════════════════════════════════════════════════════════════
+//  STOCKS CHARTS
+// ══════════════════════════════════════════════════════════════
+function loadStocks() {
+  const grid = document.getElementById("stocks-grid");
+  grid.innerHTML = "";
+  STOCKS_LIST.forEach(stock => {
+    const card = document.createElement("div");
+    card.className = "chart-card";
+    card.id = "card-" + stock.id;
+    card.innerHTML = `
+      <div class="chart-title">
+        <span class="chart-dot" style="background:${stock.color}"></span>
+        ${stock.name}
+        <span class="chart-price" id="price-${stock.id}"></span>
+        <span class="chart-chg"  id="chg-${stock.id}"></span>
+        <span class="mkt-badge"  id="status-${stock.id}"></span>
+        <div class="title-actions">
+          <button class="act-btn" data-sym="${stock.id}" title="Set alert">🔔</button>
+          <button class="act-btn fullscreen-btn" data-card="card-${stock.id}" title="Fullscreen">⛶</button>
+        </div>
+      </div>
+      <div class="chart-wrap" id="wrap-${stock.id}">
+        <span class="candle-timer" id="timer-${stock.id}">--:--</span>
+      </div>`;
+    grid.appendChild(card);
+    initChartOverlay(stock.id);
+    buildWidget(stock.id, stock.tvSym, currentTf);
+    fetchStockData(stock.yfSym).then(data => {
+      const meta = data.chart.result[0].meta;
+      const price = meta.regularMarketPrice, prev = meta.chartPreviousClose;
+      const pct = (price != null && prev) ? ((price - prev) / prev * 100) : null;
+      if (price != null) lastPrices[stock.id] = price;
+      const pEl = document.getElementById("price-" + stock.id);
+      const cEl = document.getElementById("chg-"   + stock.id);
+      const sEl = document.getElementById("status-"+ stock.id);
+      if (pEl) pEl.textContent = fmtPx(price);
+      if (cEl && pct != null) { cEl.textContent = (pct>=0?"+":"") + pct.toFixed(2)+"%"; cEl.className = "chart-chg "+(pct>=0?"up":"down"); }
+      if (sEl) { const s=nyStatus(), labels={pre:"Pre",regular:"Open",post:"After-Hours",closed:"Closed"}; sEl.textContent=labels[s]; sEl.className="mkt-badge "+s; }
+    }).catch(()=>{});
+  });
 }
+
+function renderStocks(tf) {
+  STOCKS_LIST.forEach(s => buildWidget(s.id, s.tvSym, tf));
+}
+
+function queueSparkline() {}  // kept to avoid errors if called
 
 async function fetchStockData(sym) {
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1mo`;
@@ -1061,103 +1108,6 @@ async function fetchStockData(sym) {
   throw new Error("All proxies failed: " + sym);
 }
 
-async function drainQueue() {
-  if (activeSparkFetches >= MAX_SPARK || sparkQueue.length === 0) return;
-  const item = sparkQueue.shift();
-  const {sym, canvas, row} = item;
-  activeSparkFetches++;
-  try {
-    const data   = await fetchStockData(sym);
-    const result = data.chart.result[0];
-    const meta   = result.meta;
-    const closes = result.indicators.quote[0].close;
-
-    drawSparkline(canvas, closes);
-
-    if (row) {
-      const price     = meta.regularMarketPrice;
-      const prevClose = meta.chartPreviousClose;
-      const chgPct    = (price != null && prevClose) ? ((price - prevClose) / prevClose * 100) : null;
-      const vol       = meta.regularMarketVolume;
-      const name      = meta.shortName || meta.longName;
-
-      const nameEl = row.querySelector(".sr-name-full");
-      if (nameEl && name) nameEl.textContent = name;
-      row.dataset.search = ((name || sym) + " " + sym).toLowerCase();
-      if (price  != null) row.dataset.price = price;
-      if (chgPct != null) row.dataset.chg24 = chgPct;
-      if (vol    != null) row.dataset.vol   = vol;
-
-      const priceEl = row.querySelector(".sr-price");
-      if (priceEl) priceEl.textContent = fmtPx(price);
-
-      const chgEl = row.querySelector(".sr-chg");
-      if (chgEl) {
-        const up = chgPct != null && chgPct >= 0;
-        chgEl.className = `sr-chg ${up ? "up" : "down"}`;
-        chgEl.textContent = chgPct != null ? (up ? "+" : "") + chgPct.toFixed(2) + "%" : "--";
-      }
-
-      const volEl = row.querySelector(".sr-vol");
-      if (volEl) volEl.textContent = fmtN(vol);
-    }
-  } catch(e) {
-    // retry up to 3 times with increasing delay
-    if (item.retries < 3) {
-      item.retries++;
-      setTimeout(() => { sparkQueue.push(item); drainQueue(); }, 2000 * item.retries);
-    }
-  } finally {
-    activeSparkFetches--;
-    drainQueue();
-  }
-}
-
-async function loadStocks() {
-  const body    = document.getElementById("stocks-body");
-  const countEl = document.getElementById("stocks-count");
-
-  body.innerHTML = "";
-
-  STOCKS_100.forEach((sym, idx) => {
-    const row = document.createElement("div");
-    row.className = "screener-row stocks-grid";
-    row.dataset.sym    = sym;
-    row.dataset.search = sym.toLowerCase();
-
-    const canvas = makeCanvas();
-    row._canvas = canvas;
-
-    row.innerHTML = `
-      <span class="sr-rank">${idx+1}</span>
-      <div class="sr-name">
-        <div class="sr-icon-placeholder">${sym.substring(0,2)}</div>
-        <div class="sr-name-text">
-          <span class="sr-name-full">${sym}</span>
-          <span class="sr-sym">${sym}</span>
-        </div>
-      </div>
-      <span class="sr-price">--</span>
-      <span class="sr-chg">--</span>
-      <span class="sr-num sr-vol">--</span>
-      <div class="sr-chart"></div>
-    `;
-    row.querySelector(".sr-chart").appendChild(canvas);
-    body.appendChild(row);
-
-    // Stagger requests slightly to avoid hammering the proxy
-    setTimeout(() => queueSparkline(sym, canvas, row), idx * 80);
-  });
-
-  countEl.textContent = `${STOCKS_100.length} stocks`;
-}
-
-document.getElementById("stocks-search").addEventListener("input", e => {
-  const q = e.target.value.toLowerCase();
-  document.querySelectorAll("#stocks-body .screener-row").forEach(row => {
-    row.style.display = (row.dataset.search||"").includes(q) ? "" : "none";
-  });
-});
 
 // ══════════════════════════════════════════════════════════════
 //  FOREX CHARTS
@@ -1468,6 +1418,11 @@ const SYM_NAMES = {
   COM_NG:"Natural Gas", COM_COPPER:"Copper", COM_WHEAT:"Wheat", COM_CORN:"Corn",
   SUB_PLATINUM:"Platinum", SUB_PALLADIUM:"Palladium", SUB_COCOA:"Cocoa",
   SUB_COFFEE:"Coffee", SUB_SUGAR:"Sugar", SUB_COTTON:"Cotton", SUB_SOYBEANS:"Soybeans",
+  STK_AAPL:"Apple", STK_MSFT:"Microsoft", STK_NVDA:"NVIDIA", STK_AMZN:"Amazon",
+  STK_GOOGL:"Alphabet", STK_META:"Meta", STK_TSLA:"Tesla", STK_AVGO:"Broadcom",
+  STK_BRKB:"Berkshire B", STK_JPM:"JPMorgan", STK_LLY:"Eli Lilly", STK_V:"Visa",
+  STK_UNH:"UnitedHealth", STK_XOM:"ExxonMobil", STK_MA:"Mastercard", STK_COST:"Costco",
+  STK_HD:"Home Depot", STK_PG:"P&G", STK_JNJ:"J&J", STK_ORCL:"Oracle",
 };
 
 const ALERT_INSTRUMENTS = [
@@ -1475,6 +1430,7 @@ const ALERT_INSTRUMENTS = [
   ...FOREX_PAIRS.map(p => ({id:p.id, yfSym:p.yfSym, name:p.name})),
   ...COMMODITIES_LIST.map(c => ({id:c.id, yfSym:c.yfSym, name:c.name})),
   ...SUB_COMMODITIES_LIST.map(c => ({id:c.id, yfSym:c.yfSym, name:c.name})),
+  ...STOCKS_LIST.map(s => ({id:s.id, yfSym:s.yfSym, name:s.name})),
 ];
 const ALERT_FEEDS = Object.fromEntries(ALERT_INSTRUMENTS.map(i => [i.id, i]));
 const ALERT_IDS_BY_YF = Object.fromEntries(ALERT_INSTRUMENTS.map(i => [i.yfSym, i.id]));
@@ -1838,8 +1794,6 @@ function sortScreener(bodyId, headId, colKey) {
 function initSortHeaders() {
   document.querySelectorAll("#crypto-head .sortable").forEach(span =>
     span.addEventListener("click", () => sortScreener("crypto-body","crypto-head", span.dataset.col)));
-  document.querySelectorAll("#stocks-head .sortable").forEach(span =>
-    span.addEventListener("click", () => sortScreener("stocks-body","stocks-head", span.dataset.col)));
 }
 
 // ══════════════════════════════════════════════════════════════
