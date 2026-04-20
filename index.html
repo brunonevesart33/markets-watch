@@ -736,17 +736,37 @@ async function drainQueue() {
   }
 }
 
+async function fetchYFBatch(symbols) {
+  const syms = symbols.join(",");
+  const fields = "regularMarketPrice,regularMarketChangePercent,marketCap,regularMarketVolume,shortName,longName";
+  const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms}&fields=${fields}`;
+  // Try direct first, then proxy
+  try {
+    const r = await fetch(url);
+    const d = await r.json();
+    return d.quoteResponse?.result || [];
+  } catch(_) {
+    const r = await fetch(PROXY + encodeURIComponent(url));
+    const j = await r.json();
+    const d = JSON.parse(j.contents);
+    return d.quoteResponse?.result || [];
+  }
+}
+
 async function loadStocks() {
   const body = document.getElementById("stocks-body");
   const countEl = document.getElementById("stocks-count");
   try {
-    // Batch fetch all 100 in one call
-    const syms = STOCKS_100.join(",");
-    const url = encodeURIComponent(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms}&fields=regularMarketPrice,regularMarketChangePercent,marketCap,regularMarketVolume,shortName,longName`);
-    const r  = await fetch(PROXY + url);
-    const j  = await r.json();
-    const data = JSON.parse(j.contents);
-    const quotes = data.quoteResponse?.result || [];
+    // Split into batches of 25 to avoid URL length limits
+    const BATCH = 25;
+    const batches = [];
+    for (let i = 0; i < STOCKS_100.length; i += BATCH) {
+      batches.push(STOCKS_100.slice(i, i + BATCH));
+    }
+    const results = await Promise.all(batches.map(b => fetchYFBatch(b)));
+    const quotes = results.flat();
+    const qMap = {};
+    quotes.forEach(q => { qMap[q.symbol] = q; });
 
     // Build a map for easy lookup
     const qMap = {};
