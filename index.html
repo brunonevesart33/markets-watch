@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-store" />
   <title>Markets Dashboard</title>
   <style>
     :root {
@@ -156,15 +157,24 @@
     .al-sym{font-weight:700;color:var(--accent);}
     .al-cond{color:var(--text2);}
     .al-price{font-variant-numeric:tabular-nums;font-weight:600;}
+    .al-status{font-size:10px;color:var(--text2);line-height:1.35;}
     .al-del{margin-left:auto;background:none;border:none;color:var(--text2);cursor:pointer;}
     .al-del:hover{color:var(--red);}
     .no-al{color:var(--text2);font-size:11px;text-align:center;padding:16px;}
     .toast{position:fixed;bottom:18px;right:18px;background:var(--bg2);border:1px solid var(--accent);border-radius:8px;padding:10px 14px;font-size:12px;z-index:3000;max-width:280px;box-shadow:0 4px 20px rgba(0,0,0,.4);animation:slideIn .3s ease;}
     @keyframes slideIn{from{transform:translateX(120%)}to{transform:translateX(0)}}
+    .alarm-banner{position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:3200;background:var(--bg2);border:2px solid var(--red);border-radius:8px;padding:12px 42px 12px 16px;min-width:280px;max-width:min(520px,92vw);box-shadow:0 10px 40px rgba(0,0,0,.55);}
+    .alarm-banner strong{display:block;font-size:13px;color:var(--red);margin-bottom:3px;}
+    .alarm-banner span{font-size:12px;color:var(--text);}
+    .alarm-banner button{position:absolute;top:7px;right:9px;background:none;border:none;color:var(--text2);font-size:18px;cursor:pointer;}
+    .alarm-banner button:hover{color:var(--text);}
     .alert-pop{position:fixed;z-index:1500;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:13px 14px;width:230px;box-shadow:0 8px 32px rgba(0,0,0,.55);display:none;}
     .alert-pop.show{display:block;}
     .pop-title{font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px;}
     .pop-cur{font-size:10px;color:var(--text2);margin-bottom:9px;}
+    .pop-step{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:7px;}
+    .pop-mini{background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:5px 4px;font-size:11px;font-weight:600;cursor:pointer;}
+    .pop-mini:hover{border-color:var(--accent);color:var(--accent);}
     .alert-pop select,.alert-pop input[type=number]{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:5px;font-size:12px;width:100%;outline:none;margin-bottom:7px;}
     .alert-pop select:focus,.alert-pop input[type=number]:focus{border-color:var(--accent);}
 
@@ -175,6 +185,9 @@
     .co-badge{position:absolute;right:0;background:#ffd600;color:#000;font-size:11px;font-weight:700;padding:2px 8px;border-radius:2px 0 0 2px;pointer-events:none;display:none;transform:translateY(-50%);white-space:nowrap;font-family:ui-monospace,monospace;min-width:80px;text-align:right;}
     .co-dot{position:absolute;width:8px;height:8px;background:#ffd600;border-radius:50%;pointer-events:none;display:none;transform:translate(-50%,-50%);box-shadow:0 0 6px rgba(255,214,0,.8);}
     .co-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:11px;color:rgba(255,214,0,.6);pointer-events:none;white-space:nowrap;letter-spacing:.3px;}
+    .chart-alert-tags{position:absolute;top:8px;left:8px;z-index:14;display:flex;flex-direction:column;gap:5px;align-items:flex-start;pointer-events:none;}
+    .chart-alert-tag{background:rgba(255,214,0,.92);color:#000;border:1px solid rgba(0,0,0,.25);border-radius:4px;padding:3px 8px;font-size:11px;font-weight:800;font-family:ui-monospace,monospace;box-shadow:0 2px 8px rgba(0,0,0,.35);pointer-events:auto;cursor:pointer;}
+    .chart-alert-tag:hover{background:#fff06a;}
     .chart-card.draw-mode{box-shadow:0 0 0 2px rgba(255,214,0,.55)!important;}
     .act-btn.draw-active{color:#ffd600!important;background:rgba(255,214,0,.15)!important;}
 
@@ -399,6 +412,12 @@
 <div class="alert-pop" id="alert-pop">
   <div class="pop-title">🔔 <span id="pop-sym-name"></span></div>
   <div class="pop-cur" id="pop-cur"></div>
+  <div class="pop-step">
+    <button class="pop-mini" type="button" data-step="-10">-10</button>
+    <button class="pop-mini" type="button" data-step="-1">-1</button>
+    <button class="pop-mini" type="button" data-step="1">+1</button>
+    <button class="pop-mini" type="button" data-step="10">+10</button>
+  </div>
   <input type="number" id="pop-price" step="any" placeholder="Price level" />
   <button class="btn-primary" id="pop-add-btn">Add Alert</button>
 </div>
@@ -425,6 +444,7 @@
         <input type="number" id="al-price" placeholder="Price level  e.g. 95000" step="any" />
         <button class="btn-primary" id="al-add-btn">Add Alert</button>
       </div>
+      <div class="al-status" id="al-status">Alerts are checked when live prices update.</div>
       <div class="al-list" id="al-list"></div>
     </div>
   </div>
@@ -687,20 +707,33 @@ function applyPrice(id,price,pct){
 }
 async function fetchCrypto(){
   try{
-    const url=encodeURIComponent("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true");
-    const r=await fetch(PROXY+url); const d=await r.json();
+    const url="https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true";
+    let d;
+    try {
+      const r=await fetch("/api/crypto/spot");
+      if(!r.ok)throw new Error("local " + r.status);
+      const spot=await r.json();
+      applyPrice("BTCUSD",spot.BTCUSD,null);
+      applyPrice("ETHUSD",spot.ETHUSD,null);
+      return;
+    } catch(_) {
+      const r=await fetch(PROXY+encodeURIComponent(url));
+      d=await r.json();
+    }
     applyPrice("BTCUSD",d.bitcoin?.usd,d.bitcoin?.usd_24h_change);
     applyPrice("ETHUSD",d.ethereum?.usd,d.ethereum?.usd_24h_change);
   }catch(e){console.warn("CoinGecko:",e);}
 }
 async function fetchTraditional(){
-  try{
-    const syms="^GSPC,^NDX,GC=F,DX-Y.NYB";
-    const symMap={"^GSPC":"SPX","^NDX":"NDX","GC=F":"GOLD","DX-Y.NYB":"DXY"};
-    const yf=encodeURIComponent(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms}&fields=regularMarketPrice,regularMarketChangePercent`);
-    const r=await fetch(PROXY+yf); const data=await r.json();
-    (data.quoteResponse?.result||[]).forEach(q=>{const id=symMap[q.symbol];if(id)applyPrice(id,q.regularMarketPrice,q.regularMarketChangePercent);});
-  }catch(e){console.warn("Yahoo Finance:",e);}
+  await Promise.all(CHARTS.filter(c=>!["BTCUSD","ETHUSD"].includes(c.id)).map(async c=>{
+    try{
+      const data=await fetchStockData(c.yahoo);
+      const meta=data?.chart?.result?.[0]?.meta;
+      const price=meta?.regularMarketPrice, prev=meta?.chartPreviousClose;
+      const pct=(price!=null&&prev)?((price-prev)/prev*100):null;
+      applyPrice(c.id,price,pct);
+    }catch(e){console.warn("Yahoo chart:",c.id,e);}
+  }));
 }
 function fetchPrices(){Promise.all([fetchCrypto(),fetchTraditional()]).then(checkAlerts);}
 
@@ -803,6 +836,12 @@ async function fetchStockData(sym) {
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1mo`;
 
   const attempts = [
+    // local proxy from server.py
+    async () => {
+      const r = await fetch(`/api/yahoo/chart/${encodeURIComponent(sym)}?interval=1d&range=1mo`);
+      if (!r.ok) throw new Error("local " + r.status);
+      return await r.json();
+    },
     // 1. corsproxy.io
     async () => {
       const r = await fetch("https://corsproxy.io/?" + encodeURIComponent(url));
@@ -1134,20 +1173,9 @@ document.getElementById("crypto-search").addEventListener("input", e => {
 // ══════════════════════════════════════════════════════════════
 let activeOverlay = null;
 
-function overlayYToPrice(sym, y, h) {
-  const base = lastPrices[sym];
-  if (!base || h === 0) return null;
-  return base * 1.10 - (y / h) * base * 0.20;
-}
-
 function overlayDecimals(sym) {
   return sym.startsWith("FX_") ? 5 : sym === "BTCUSD" ? 0 : 2;
 }
-function fmtOverlayPrice(sym, p) {
-  if (p == null) return "--";
-  return p.toFixed(overlayDecimals(sym));
-}
-
 function initChartOverlay(symId) {
   const wrap = document.getElementById("wrap-" + symId);
   const card = document.getElementById("card-" + symId);
@@ -1157,13 +1185,19 @@ function initChartOverlay(symId) {
   overlay.className = "chart-overlay";
   overlay.id = "overlay-" + symId;
 
+  const tags = document.createElement("div");
+  tags.className = "chart-alert-tags";
+  tags.id = "chart-alerts-" + symId;
+  wrap.appendChild(tags);
+
   const line  = document.createElement("div"); line.className  = "co-line";
   const badge = document.createElement("div"); badge.className = "co-badge";
   const dot   = document.createElement("div"); dot.className   = "co-dot";
   const hint  = document.createElement("div"); hint.className  = "co-hint";
-  hint.textContent = "click to set alert";
+  hint.textContent = "click to enter exact alert price";
   overlay.append(line, badge, dot, hint);
   wrap.appendChild(overlay);
+  renderChartAlertTags();
 
   // Add toggle button to title-actions
   const actions = card.querySelector(".title-actions");
@@ -1180,11 +1214,10 @@ function initChartOverlay(symId) {
     const rect = overlay.getBoundingClientRect();
     const y = e.clientY - rect.top;
     const x = e.clientX - rect.left;
-    const price = overlayYToPrice(symId, y, rect.height);
 
     line.style.cssText  = `display:block;top:${y}px;`;
     badge.style.cssText = `display:block;top:${y}px;`;
-    badge.textContent   = fmtOverlayPrice(symId, price);
+    badge.textContent   = "Set exact";
     dot.style.cssText   = `display:block;top:${y}px;left:${x}px;`;
   });
 
@@ -1194,17 +1227,8 @@ function initChartOverlay(symId) {
 
   overlay.addEventListener("click", e => {
     e.stopPropagation();
-    const rect = overlay.getBoundingClientRect();
-    const price = overlayYToPrice(symId, e.clientY - rect.top, rect.height);
     exitDrawMode();
-    if (!price) return;
-    const rounded = parseFloat(price.toFixed(overlayDecimals(symId)));
-    const cur = lastPrices[symId];
-    const dir = (cur == null || cur < rounded) ? "above" : "below";
-    alerts.push({sym: symId, dir, price: rounded, id: Date.now()});
-    saveAlerts();
-    checkAlerts();
-    showToast(`🔔 Alert set: ${SYM_NAMES[symId]||symId} crosses ${fmtOverlayPrice(symId, rounded)}`);
+    showAlertPopAt(e.clientX, e.clientY, symId);
   });
 }
 
@@ -1246,14 +1270,75 @@ const SYM_NAMES = {
   SUB_COFFEE:"Coffee", SUB_SUGAR:"Sugar", SUB_COTTON:"Cotton", SUB_SOYBEANS:"Soybeans",
 };
 
-function saveAlerts(){localStorage.setItem("mw_alerts",JSON.stringify(alerts));}
+const ALERT_INSTRUMENTS = [
+  ...CHARTS.map(c => ({id:c.id, yfSym:c.yahoo, name:SYM_NAMES[c.id] || c.id})),
+  ...FOREX_PAIRS.map(p => ({id:p.id, yfSym:p.yfSym, name:p.name})),
+  ...COMMODITIES_LIST.map(c => ({id:c.id, yfSym:c.yfSym, name:c.name})),
+  ...SUB_COMMODITIES_LIST.map(c => ({id:c.id, yfSym:c.yfSym, name:c.name})),
+];
+const ALERT_FEEDS = Object.fromEntries(ALERT_INSTRUMENTS.map(i => [i.id, i]));
+const ALERT_IDS_BY_YF = Object.fromEntries(ALERT_INSTRUMENTS.map(i => [i.yfSym, i.id]));
+let alertStatusText = "Alerts are checked when live prices update.";
+
+function renderAlertSymbolOptions() {
+  const sel = document.getElementById("al-sym");
+  if (!sel) return;
+  sel.innerHTML = ALERT_INSTRUMENTS
+    .map(i => `<option value="${i.id}">${i.name}</option>`)
+    .join("");
+}
+
+function makeAlert(sym, price) {
+  const cur = Number(lastPrices[sym]);
+  const hasCur = Number.isFinite(cur);
+  return {
+    sym,
+    price,
+    startSide: hasCur ? (cur < price ? "below" : cur > price ? "above" : "at") : null,
+    lastPrice: hasCur ? cur : null,
+    id: Date.now() + Math.floor(Math.random() * 1000),
+  };
+}
+
+function setAlertStatus(msg) {
+  alertStatusText = msg;
+  const el = document.getElementById("al-status");
+  if (el) el.textContent = msg;
+}
+
+function renderChartAlertTags() {
+  document.querySelectorAll(".chart-alert-tags").forEach(box => {
+    const sym = box.id.replace("chart-alerts-", "");
+    const symAlerts = alerts.filter(a => a.sym === sym);
+    box.innerHTML = "";
+    symAlerts.forEach(a => {
+      const tag = document.createElement("button");
+      tag.type = "button";
+      tag.className = "chart-alert-tag";
+      tag.dataset.alertId = String(a.id);
+      tag.title = "Remove alert";
+      tag.textContent = "TARGET " + Number(a.price).toLocaleString();
+      tag.addEventListener("click", e => {
+        e.stopPropagation();
+        alerts = alerts.filter(x => String(x.id) !== tag.dataset.alertId);
+        saveAlerts();
+        renderAlerts();
+        showToast("Alert removed");
+      });
+      box.appendChild(tag);
+    });
+  });
+}
+
+function saveAlerts(){localStorage.setItem("mw_alerts",JSON.stringify(alerts));renderChartAlertTags();}
 function renderAlerts(){
   const list=document.getElementById("al-list");
+  setAlertStatus(alertStatusText);
   if(!alerts.length){list.innerHTML='<div class="no-al">No alerts set</div>';return;}
   list.innerHTML=alerts.map((a,i)=>`
     <div class="al-item">
       <span class="al-sym">${SYM_NAMES[a.sym]||a.sym}</span>
-      <span class="al-cond">crosses</span>
+      <span class="al-cond">target</span>
       <span class="al-price">${a.price.toLocaleString()}</span>
       <button class="al-del" data-i="${i}">✕</button>
     </div>`).join("");
@@ -1263,9 +1348,8 @@ document.getElementById("al-add-btn").addEventListener("click",()=>{
   const sym=document.getElementById("al-sym").value;
   const price=parseFloat(document.getElementById("al-price").value);
   if(!price||price<=0)return;
-  const cur=lastPrices[sym];
-  const dir=(cur==null||cur<price)?"above":"below";
-  alerts.push({sym,dir,price,id:Date.now()});
+  alerts.push(makeAlert(sym, price));
+  requestAlertPermission();
   saveAlerts(); checkAlerts(); renderAlerts();
   document.getElementById("al-price").value="";
 });
@@ -1275,23 +1359,41 @@ function fmtPopHint(sym, p) {
   const str = sym.startsWith("FX_") ? fmtForexPrice(p) : fmtPx(p);
   return "Current: " + str;
 }
-function showAlertPop(btn, sym) {
+function alertStep(sym, p) {
+  if (sym.startsWith("FX_")) return p >= 50 ? 0.01 : 0.0001;
+  if (sym === "BTCUSD") return 50;
+  if (sym === "ETHUSD") return 5;
+  if (p >= 1000) return 10;
+  if (p >= 100) return 1;
+  if (p >= 10) return 0.1;
+  return 0.01;
+}
+function setPopPrice(sym, price) {
+  const input = document.getElementById("pop-price");
+  if (!input || !Number.isFinite(price)) return;
+  input.value = price.toFixed(overlayDecimals(sym));
+}
+function showAlertPopAt(x, y, sym) {
   const pop = document.getElementById("alert-pop");
-  const rect = btn.getBoundingClientRect();
   const W = 230, H = 170;
-  let top = rect.bottom + 6, left = rect.left;
-  if (top + H > window.innerHeight - 10) top = rect.top - H - 6;
+  let top = y + 6, left = x;
+  if (top + H > window.innerHeight - 10) top = y - H - 6;
   if (left + W > window.innerWidth - 10) left = window.innerWidth - W - 10;
   if (left < 8) left = 8;
+  if (top < 8) top = 8;
   pop.style.top = top + "px";
   pop.style.left = left + "px";
   const p = lastPrices[sym];
   document.getElementById("pop-sym-name").textContent = SYM_NAMES[sym] || sym;
   document.getElementById("pop-cur").textContent = fmtPopHint(sym, p);
-  document.getElementById("pop-price").value = p ? p.toFixed(sym.startsWith("FX_") ? 5 : 2) : "";
+  setPopPrice(sym, Number(p));
   pop._sym = sym;
   pop.classList.add("show");
   setTimeout(() => document.getElementById("pop-price").focus(), 30);
+}
+function showAlertPop(btn, sym) {
+  const rect = btn.getBoundingClientRect();
+  showAlertPopAt(rect.left, rect.bottom, sym);
 }
 
 // Event delegation — covers static and dynamically-created buttons
@@ -1311,14 +1413,31 @@ document.addEventListener("keydown", e => {
   if (e.key === "Escape") { exitDrawMode(); document.getElementById("alert-pop").classList.remove("show"); }
 });
 
+document.querySelectorAll("#alert-pop [data-step]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const pop = document.getElementById("alert-pop");
+    const sym = pop._sym;
+    if (!sym) return;
+    const input = document.getElementById("pop-price");
+    const curInput = Number(input.value || lastPrices[sym]);
+    if (!Number.isFinite(curInput)) return;
+    setPopPrice(sym, curInput + alertStep(sym, curInput) * Number(btn.dataset.step));
+    input.focus();
+    input.select();
+  });
+});
+
+document.getElementById("pop-price").addEventListener("keydown", e => {
+  if (e.key === "Enter") document.getElementById("pop-add-btn").click();
+});
+
 document.getElementById("pop-add-btn").addEventListener("click", () => {
   const pop = document.getElementById("alert-pop");
   const sym = pop._sym; if (!sym) return;
   const price = parseFloat(document.getElementById("pop-price").value);
   if (!price || price <= 0) { document.getElementById("pop-price").focus(); return; }
-  const cur = lastPrices[sym];
-  const dir = (cur == null || cur < price) ? "above" : "below";
-  alerts.push({sym, dir, price, id: Date.now()});
+  alerts.push(makeAlert(sym, price));
+  requestAlertPermission();
   saveAlerts();
   checkAlerts();
   pop.classList.remove("show");
@@ -1330,6 +1449,29 @@ document.getElementById("modal-close").addEventListener("click",()=>{document.ge
 document.getElementById("alerts-modal").addEventListener("click",e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove("show");});
 
 function showToast(msg){const t=document.createElement("div");t.className="toast";t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),5000);}
+
+function showAlarmBanner(title, msg) {
+  document.querySelectorAll(".alarm-banner").forEach(el => el.remove());
+  const b = document.createElement("div");
+  b.className = "alarm-banner";
+  const strong = document.createElement("strong");
+  strong.textContent = title;
+  const span = document.createElement("span");
+  span.textContent = msg;
+  const close = document.createElement("button");
+  close.type = "button";
+  close.textContent = "×";
+  close.addEventListener("click", () => b.remove());
+  b.append(strong, span, close);
+  document.body.appendChild(b);
+}
+
+function requestAlertPermission() {
+  if ("Notification" in window && Notification.permission === "default") {
+    const req = Notification.requestPermission();
+    if (req?.catch) req.catch(()=>{});
+  }
+}
 
 function playAlertSound(){
   try{
@@ -1348,19 +1490,115 @@ function playAlertSound(){
 function checkAlerts(){
   let changed=false;
   alerts=alerts.filter(a=>{
-    const p=lastPrices[a.sym]; if(p==null)return true;
-    const hit=(a.dir==="above"&&p>=a.price)||(a.dir==="below"&&p<=a.price);
+    const p=Number(lastPrices[a.sym]); if(!Number.isFinite(p))return true;
+    const level=Number(a.price); if(!Number.isFinite(level))return false;
+    if(a.startSide !== "below" && a.startSide !== "above" && a.startSide !== "at"){
+      a.startSide = p < level ? "below" : p > level ? "above" : "at";
+      a.lastPrice = p;
+      changed = true;
+      return true;
+    }
+    const hit=(a.startSide==="below"&&p>=level)||(a.startSide==="above"&&p<=level)||a.startSide==="at";
     if(hit){
+      const name=SYM_NAMES[a.sym]||a.sym;
+      const msg=`${name} crossed ${level.toLocaleString()} · now ${p.toLocaleString()}`;
       playAlertSound();
-      showToast(`🔔 ${SYM_NAMES[a.sym]} crossed ${a.price.toLocaleString()} · now ${p.toLocaleString()}`);
-      if(Notification.permission==="granted")new Notification("MarketWatch",{body:`${SYM_NAMES[a.sym]} hit ${a.price.toLocaleString()}`});
+      showToast(`🔔 ${msg}`);
+      showAlarmBanner("Price alert", msg);
+      if("Notification" in window && Notification.permission==="granted")new Notification("MarketWatch",{body:`${name} hit ${level.toLocaleString()}`});
       changed=true; return false;
     }
+    if(a.lastPrice!==p){a.lastPrice=p; changed=true;}
     return true;
   });
-  if(changed)saveAlerts();
+  if(changed){
+    saveAlerts();
+    if(document.getElementById("alerts-modal")?.classList.contains("show"))renderAlerts();
+  }
 }
-if("Notification" in window&&Notification.permission==="default")Notification.requestPermission();
+
+async function fetchJsonWithProxies(url) {
+  const attempts = [
+    () => {
+      const u = new URL(url);
+      if (u.hostname !== "query1.finance.yahoo.com" || u.pathname !== "/v7/finance/quote") throw new Error("no local route");
+      return fetch(`/api/yahoo/quote${u.search}`).then(r => { if(!r.ok)throw new Error("local " + r.status); return r.json(); });
+    },
+    () => fetch(url).then(r => { if(!r.ok)throw new Error("direct " + r.status); return r.json(); }),
+    () => fetch("https://corsproxy.io/?" + encodeURIComponent(url)).then(r => { if(!r.ok)throw new Error("cors " + r.status); return r.json(); }),
+    () => fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(url)).then(r => { if(!r.ok)throw new Error("raw " + r.status); return r.json(); }),
+    () => fetch("https://api.allorigins.win/get?url=" + encodeURIComponent(url)).then(async r => {
+      if(!r.ok)throw new Error("get " + r.status);
+      const j = await r.json();
+      return JSON.parse(j.contents);
+    }),
+  ];
+  let lastErr;
+  for (const attempt of attempts) {
+    try { return await attempt(); } catch(e) { lastErr = e; }
+  }
+  throw lastErr || new Error("all sources failed");
+}
+
+async function fetchAlertPrices(){
+  const symbols = [...new Set(alerts.map(a => a.sym))].filter(sym => ALERT_FEEDS[sym]);
+  if (!symbols.length) {
+    setAlertStatus("No active alerts.");
+    return checkAlerts();
+  }
+
+  const quoteSymbols = symbols.filter(sym => !["BTCUSD","ETHUSD"].includes(sym));
+  const yfSymbols = quoteSymbols.map(sym => ALERT_FEEDS[sym].yfSym);
+  let updated = 0, failed = 0;
+  const updatedSyms = new Set();
+  if (symbols.includes("BTCUSD") || symbols.includes("ETHUSD")) {
+    try {
+      const r = await fetch("/api/crypto/spot");
+      if (!r.ok) throw new Error("crypto " + r.status);
+      const spot = await r.json();
+      ["BTCUSD","ETHUSD"].forEach(sym => {
+        if (symbols.includes(sym) && spot[sym] != null) {
+          lastPrices[sym] = spot[sym];
+          updatedSyms.add(sym);
+          updated++;
+        }
+      });
+    } catch(_) {}
+  }
+  if (yfSymbols.length) try {
+    const quoteUrl = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=" + encodeURIComponent(yfSymbols.join(",")) + "&fields=regularMarketPrice";
+    const data = await fetchJsonWithProxies(quoteUrl);
+    (data.quoteResponse?.result || []).forEach(q => {
+      const id = ALERT_IDS_BY_YF[q.symbol];
+      if (id && q.regularMarketPrice != null) {
+        lastPrices[id] = q.regularMarketPrice;
+        updatedSyms.add(id);
+        updated++;
+      }
+    });
+  } catch(_) {}
+
+  await Promise.all(symbols.filter(sym => !updatedSyms.has(sym)).map(async sym => {
+    try {
+      const data = await fetchStockData(ALERT_FEEDS[sym].yfSym);
+      const price = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
+      if (price != null) {
+        lastPrices[sym] = price;
+        updatedSyms.add(sym);
+        updated++;
+      } else {
+        failed++;
+      }
+    } catch(_) { failed++; }
+  }));
+  const stamp = new Date().toLocaleTimeString();
+  const sample = symbols.slice(0, 3).map(sym => {
+    const p = Number(lastPrices[sym]);
+    return `${SYM_NAMES[sym] || sym}: ${Number.isFinite(p) ? p.toLocaleString() : "--"}`;
+  }).join(" | ");
+  setAlertStatus(`Last alert check ${stamp}: ${updated}/${symbols.length} prices updated${failed ? `, ${failed} failed` : ""}. ${sample}`);
+  checkAlerts();
+}
 
 // ══════════════════════════════════════════════════════════════
 //  ECONOMIC CALENDAR
@@ -1383,15 +1621,18 @@ function loadCalendar(){
 // ══════════════════════════════════════════════════════════════
 //  BOOT
 // ══════════════════════════════════════════════════════════════
+renderAlertSymbolOptions();
 CHARTS.forEach(c => initChartOverlay(c.id));
+renderChartAlertTags();
 
 const tvScript=document.createElement("script");
 tvScript.src="https://s3.tradingview.com/tv.js";
 tvScript.onload=()=>{renderAll(currentTf);startTimer();};
 document.head.appendChild(tvScript);
 
-fetchPrices(); fetchFNG(); loadCalendar();
+fetchPrices(); fetchAlertPrices(); fetchFNG(); loadCalendar();
 setInterval(fetchPrices, 15000);
+setInterval(fetchAlertPrices, 30000);
 setInterval(fetchFNG,   300000);
 </script>
 </body>
