@@ -63,7 +63,10 @@
 
     /* ── Chart grid ── */
     .grid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,42vh);gap:10px;padding:10px;}
+    .forex-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px;}
+    .commodities-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px;}
     .chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;display:flex;flex-direction:column;height:42vh;transition:box-shadow .2s;}
+    .forex-grid .chart-card,.commodities-grid .chart-card{height:44vh;}
     .chart-card:hover{box-shadow:0 0 0 1px rgba(88,166,255,.4);}
     .chart-card.fullscreen{position:fixed!important;inset:0!important;z-index:1000!important;border-radius:0!important;min-height:100vh!important;}
     .chart-title{padding:7px 10px;font-size:12px;font-weight:600;color:var(--text);background:var(--bg3);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;flex-shrink:0;min-height:36px;}
@@ -81,8 +84,7 @@
     .act-btn:hover{color:var(--text);background:var(--border);}
     .chart-wrap{flex:1;position:relative;}
     .chart-wrap iframe,.chart-wrap>div{position:absolute;inset:0;width:100%;height:100%;}
-    .candle-timer{position:absolute!important;inset:auto!important;width:auto!important;height:auto!important;
-      bottom:36px;right:4px;z-index:10;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;
+    .candle-timer{position:absolute!important;top:6px!important;right:6px!important;bottom:auto!important;left:auto!important;width:auto!important;height:auto!important;z-index:10;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;
       font-family:ui-monospace,monospace;color:#d1d5db;background:#131722;border:1px solid #363a45;
       border-radius:3px;padding:2px 6px;pointer-events:none;}
 
@@ -114,9 +116,11 @@
     .screener-row:hover{background:var(--bg3);}
 
     /* Crypto columns: # name price 24h 7d mktcap vol chart */
-    .crypto-grid{grid-template-columns:44px 1fr 110px 80px 80px 110px 110px 140px;}
+    .crypto-grid{grid-template-columns:44px 1fr 110px 80px 80px 110px 110px 200px;}
     /* Stocks columns: # name price 24h vol chart */
-    .stocks-grid{grid-template-columns:44px 1fr 110px 80px 110px 140px;}
+    .stocks-grid{grid-template-columns:44px 1fr 110px 80px 110px 200px;}
+
+    .screener-row{min-height:64px;}
 
     .sr-rank{font-size:12px;color:var(--text2);font-weight:600;}
     .sr-name{display:flex;align-items:center;gap:8px;min-width:0;}
@@ -157,6 +161,22 @@
     .no-al{color:var(--text2);font-size:11px;text-align:center;padding:16px;}
     .toast{position:fixed;bottom:18px;right:18px;background:var(--bg2);border:1px solid var(--accent);border-radius:8px;padding:10px 14px;font-size:12px;z-index:3000;max-width:280px;box-shadow:0 4px 20px rgba(0,0,0,.4);animation:slideIn .3s ease;}
     @keyframes slideIn{from{transform:translateX(120%)}to{transform:translateX(0)}}
+    .alert-pop{position:fixed;z-index:1500;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:13px 14px;width:230px;box-shadow:0 8px 32px rgba(0,0,0,.55);display:none;}
+    .alert-pop.show{display:block;}
+    .pop-title{font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px;}
+    .pop-cur{font-size:10px;color:var(--text2);margin-bottom:9px;}
+    .alert-pop select,.alert-pop input[type=number]{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:5px;font-size:12px;width:100%;outline:none;margin-bottom:7px;}
+    .alert-pop select:focus,.alert-pop input[type=number]:focus{border-color:var(--accent);}
+
+    /* ── Chart draw-alert overlay ── */
+    .chart-overlay{position:absolute;inset:0;z-index:20;cursor:crosshair;display:none;}
+    .chart-overlay.active{display:block;}
+    .co-line{position:absolute;left:0;right:0;height:0;border-top:1px dashed rgba(255,214,0,.85);pointer-events:none;display:none;}
+    .co-badge{position:absolute;right:0;background:#ffd600;color:#000;font-size:11px;font-weight:700;padding:2px 8px;border-radius:2px 0 0 2px;pointer-events:none;display:none;transform:translateY(-50%);white-space:nowrap;font-family:ui-monospace,monospace;min-width:80px;text-align:right;}
+    .co-dot{position:absolute;width:8px;height:8px;background:#ffd600;border-radius:50%;pointer-events:none;display:none;transform:translate(-50%,-50%);box-shadow:0 0 6px rgba(255,214,0,.8);}
+    .co-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:11px;color:rgba(255,214,0,.6);pointer-events:none;white-space:nowrap;letter-spacing:.3px;}
+    .chart-card.draw-mode{box-shadow:0 0 0 2px rgba(255,214,0,.55)!important;}
+    .act-btn.draw-active{color:#ffd600!important;background:rgba(255,214,0,.15)!important;}
 
     footer{text-align:center;padding:8px;font-size:10px;color:var(--text2);border-top:1px solid var(--border);}
 
@@ -176,9 +196,9 @@
       <button class="tf-btn" data-tf="5">5m</button>
       <button class="tf-btn" data-tf="15">15m</button>
       <button class="tf-btn" data-tf="30">30m</button>
-      <button class="tf-btn" data-tf="60">1H</button>
+      <button class="tf-btn active" data-tf="60">1H</button>
       <button class="tf-btn" data-tf="240">4H</button>
-      <button class="tf-btn active" data-tf="D">1D</button>
+      <button class="tf-btn" data-tf="D">1D</button>
       <button class="tf-btn" data-tf="W">1W</button>
       <button class="tf-btn" data-tf="M">1M</button>
     </div>
@@ -192,6 +212,9 @@
   <button class="tab-btn active" data-tab="dashboard">📊 Dashboard</button>
   <button class="tab-btn" data-tab="stocks">📈 Stocks</button>
   <button class="tab-btn" data-tab="crypto">₿ Crypto</button>
+  <button class="tab-btn" data-tab="forex">💱 Forex</button>
+  <button class="tab-btn" data-tab="commodities">🛢 Commodities</button>
+  <button class="tab-btn" data-tab="subcommodities">🌾 Sub Commodities</button>
 </nav>
 
 <!-- ══════════════════ DASHBOARD TAB ══════════════════ -->
@@ -225,7 +248,7 @@
         <div class="fng-gauge"><div class="fng-gauge-fill" id="fng-fill" style="width:0%"></div></div>
       </div>
     </div>
-    <div class="utc-clock" id="utc-clock">UTC <b>--:--:--</b></div>
+    <div class="utc-clock" id="utc-clock">Local <b>--:--:--</b></div>
   </div>
 
   <div class="grid">
@@ -357,6 +380,29 @@
   </div>
 </div>
 
+<!-- ══════════════════ FOREX TAB ══════════════════ -->
+<div class="tab-panel" id="tab-forex">
+  <div class="forex-grid" id="forex-grid"></div>
+</div>
+
+<!-- ══════════════════ COMMODITIES TAB ══════════════════ -->
+<div class="tab-panel" id="tab-commodities">
+  <div class="commodities-grid" id="commodities-grid"></div>
+</div>
+
+<!-- ══════════════════ SUB COMMODITIES TAB ══════════════════ -->
+<div class="tab-panel" id="tab-subcommodities">
+  <div class="commodities-grid" id="subcommodities-grid"></div>
+</div>
+
+<!-- ── Inline alert popover ── -->
+<div class="alert-pop" id="alert-pop">
+  <div class="pop-title">🔔 <span id="pop-sym-name"></span></div>
+  <div class="pop-cur" id="pop-cur"></div>
+  <input type="number" id="pop-price" step="any" placeholder="Price level" />
+  <button class="btn-primary" id="pop-add-btn">Add Alert</button>
+</div>
+
 <!-- ── Alerts modal ── -->
 <div class="modal-backdrop" id="alerts-modal">
   <div class="modal">
@@ -374,10 +420,6 @@
             <option value="NDX">NASDAQ 100</option>
             <option value="GOLD">XAU / USD</option>
             <option value="DXY">DXY</option>
-          </select>
-          <select id="al-dir">
-            <option value="above">Crosses Above ↑</option>
-            <option value="below">Crosses Below ↓</option>
           </select>
         </div>
         <input type="number" id="al-price" placeholder="Price level  e.g. 95000" step="any" />
@@ -406,12 +448,49 @@ const STOCKS_100 = [
   "LLY","V","UNH","XOM","MA","COST","HD","PG","JNJ","ORCL"
 ];
 
-const PROXY = "https://api.allorigins.win/get?url=";
-let currentTf  = "D";
+const FOREX_PAIRS = [
+  {id:"FX_EURUSD", tvSym:"FX:EURUSD",  yfSym:"EURUSD=X", name:"EUR / USD", flags:"🇪🇺🇺🇸"},
+  {id:"FX_GBPUSD", tvSym:"FX:GBPUSD",  yfSym:"GBPUSD=X", name:"GBP / USD", flags:"🇬🇧🇺🇸"},
+  {id:"FX_USDJPY", tvSym:"FX:USDJPY",  yfSym:"USDJPY=X", name:"USD / JPY", flags:"🇺🇸🇯🇵"},
+  {id:"FX_USDCHF", tvSym:"FX:USDCHF",  yfSym:"USDCHF=X", name:"USD / CHF", flags:"🇺🇸🇨🇭"},
+  {id:"FX_AUDUSD", tvSym:"FX:AUDUSD",  yfSym:"AUDUSD=X", name:"AUD / USD", flags:"🇦🇺🇺🇸"},
+  {id:"FX_USDCAD", tvSym:"FX:USDCAD",  yfSym:"USDCAD=X", name:"USD / CAD", flags:"🇺🇸🇨🇦"},
+  {id:"FX_NZDUSD", tvSym:"FX:NZDUSD",  yfSym:"NZDUSD=X", name:"NZD / USD", flags:"🇳🇿🇺🇸"},
+  {id:"FX_EURGBP", tvSym:"FX:EURGBP",  yfSym:"EURGBP=X", name:"EUR / GBP", flags:"🇪🇺🇬🇧"},
+  {id:"FX_EURJPY", tvSym:"FX:EURJPY",  yfSym:"EURJPY=X", name:"EUR / JPY", flags:"🇪🇺🇯🇵"},
+  {id:"FX_GBPJPY", tvSym:"FX:GBPJPY",  yfSym:"GBPJPY=X", name:"GBP / JPY", flags:"🇬🇧🇯🇵"},
+];
+
+const COMMODITIES_LIST = [
+  {id:"COM_GOLD",   tvSym:"CAPITALCOM:GOLD",        yfSym:"GC=F",  name:"Gold",        color:"#ffd700", mcap:"~$20T"},
+  {id:"COM_SILVER", tvSym:"CAPITALCOM:SILVER",      yfSym:"SI=F",  name:"Silver",      color:"#c0c0c0", mcap:"~$1.8T"},
+  {id:"COM_WTI",    tvSym:"CAPITALCOM:OIL_CRUDE",   yfSym:"CL=F",  name:"WTI Crude",   color:"#8B6914", mcap:"—"},
+  {id:"COM_BRENT",  tvSym:"TVC:UKOIL",              yfSym:"BZ=F",  name:"Brent Crude", color:"#a0522d", mcap:"—"},
+  {id:"COM_NG",     tvSym:"CAPITALCOM:NATURALGAS",  yfSym:"NG=F",  name:"Natural Gas", color:"#4169e1", mcap:"—"},
+  {id:"COM_COPPER", tvSym:"CAPITALCOM:COPPER",      yfSym:"HG=F",  name:"Copper",      color:"#b87333", mcap:"~$200B"},
+  {id:"COM_WHEAT",  tvSym:"CAPITALCOM:WHEAT",       yfSym:"ZW=F",  name:"Wheat",       color:"#daa520", mcap:"~$200B"},
+  {id:"COM_CORN",   tvSym:"CAPITALCOM:CORN",        yfSym:"ZC=F",  name:"Corn",        color:"#f0c040", mcap:"~$180B"},
+];
+
+const SUB_COMMODITIES_LIST = [
+  {id:"SUB_PLATINUM",  tvSym:"CAPITALCOM:PLATINUM",  yfSym:"PL=F",  name:"Platinum",  color:"#e5e4e2", mcap:"~$300B"},
+  {id:"SUB_PALLADIUM", tvSym:"CAPITALCOM:PALLADIUM",  yfSym:"PA=F",  name:"Palladium", color:"#cec8b5", mcap:"~$50B"},
+  {id:"SUB_COCOA",     tvSym:"PEPPERSTONE:COCOA",     yfSym:"CC=F",  name:"Cocoa",     color:"#8b4513", mcap:"—"},
+  {id:"SUB_COFFEE",    tvSym:"PEPPERSTONE:COFFEE",    yfSym:"KC=F",  name:"Coffee",    color:"#6f4e37", mcap:"—"},
+  {id:"SUB_SUGAR",     tvSym:"PEPPERSTONE:SUGAR",     yfSym:"SB=F",  name:"Sugar",     color:"#e8d5a3", mcap:"—"},
+  {id:"SUB_COTTON",    tvSym:"PEPPERSTONE:COTTON",    yfSym:"CT=F",  name:"Cotton",    color:"#a8d8a8", mcap:"—"},
+  {id:"SUB_SOYBEANS",  tvSym:"PEPPERSTONE:SOYBEANS",  yfSym:"ZS=F",  name:"Soybeans",  color:"#c8b560", mcap:"—"},
+];
+
+const PROXY = "https://corsproxy.io/?";
+let currentTf  = "60";
 let isDark     = true;
 let lastPrices = {};
 let stocksLoaded = false;
 let cryptoLoaded = false;
+let forexLoaded = false;
+let commoditiesLoaded = false;
+let subCommoditiesLoaded = false;
 
 // ══════════════════════════════════════════════════════════════
 //  TABS
@@ -423,11 +502,14 @@ document.querySelectorAll(".tab-btn").forEach(btn => {
     document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
     btn.classList.add("active");
     document.getElementById("tab-" + tab).classList.add("active");
-    // Show TF bar only on dashboard
-    document.getElementById("tf-bar").style.display = tab === "dashboard" ? "flex" : "none";
+    // Show TF bar on chart tabs
+    document.getElementById("tf-bar").style.display = ["dashboard","forex","commodities","subcommodities"].includes(tab) ? "flex" : "none";
     // Lazy-load screeners on first visit
-    if (tab === "stocks" && !stocksLoaded) { stocksLoaded = true; loadStocks(); }
-    if (tab === "crypto" && !cryptoLoaded) { cryptoLoaded = true; loadCrypto(); }
+    if (tab === "stocks"      && !stocksLoaded)      { stocksLoaded = true;      loadStocks(); }
+    if (tab === "crypto"      && !cryptoLoaded)      { cryptoLoaded = true;      loadCrypto(); }
+    if (tab === "forex"       && !forexLoaded)       { forexLoaded = true;       loadForex(); }
+    if (tab === "commodities"    && !commoditiesLoaded)    { commoditiesLoaded = true;    loadCommodities(); }
+    if (tab === "subcommodities" && !subCommoditiesLoaded) { subCommoditiesLoaded = true; loadSubCommodities(); }
   });
 });
 
@@ -439,6 +521,9 @@ document.getElementById("theme-btn").addEventListener("click", () => {
   document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
   document.getElementById("theme-btn").textContent = isDark ? "🌙 Theme" : "☀️ Theme";
   renderAll(currentTf);
+  if (forexLoaded)          renderForex(currentTf);
+  if (commoditiesLoaded)    renderCommodities(currentTf);
+  if (subCommoditiesLoaded) renderSubCommodities(currentTf);
 });
 
 // ══════════════════════════════════════════════════════════════
@@ -469,23 +554,29 @@ function renderAll(tf) {
   CHARTS.forEach(c => buildWidget(c.id, c.symbol, tf));
 }
 document.querySelectorAll(".tf-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
     document.querySelectorAll(".tf-btn").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     renderAll(btn.dataset.tf);
+    if (forexLoaded)       renderForex(btn.dataset.tf);
+    if (commoditiesLoaded)    renderCommodities(btn.dataset.tf);
+    if (subCommoditiesLoaded) renderSubCommodities(btn.dataset.tf);
     startTimer();
+    btn.blur();
   });
 });
 
-// ── Fullscreen ────────────────────────────────────────────────
-document.querySelectorAll(".fullscreen-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const card = document.getElementById(btn.dataset.card);
-    const on   = card.classList.toggle("fullscreen");
-    btn.textContent = on ? "✕" : "⛶";
-    btn.title       = on ? "Exit fullscreen" : "Fullscreen";
-    document.body.style.overflow = on ? "hidden" : "";
-  });
+// ── Fullscreen (event delegation covers dynamic cards too) ────
+document.addEventListener("click", e => {
+  const btn = e.target.closest(".fullscreen-btn");
+  if (!btn) return;
+  const card = document.getElementById(btn.dataset.card);
+  if (!card) return;
+  const on = card.classList.toggle("fullscreen");
+  btn.textContent = on ? "✕" : "⛶";
+  btn.title       = on ? "Exit fullscreen" : "Fullscreen";
+  document.body.style.overflow = on ? "hidden" : "";
 });
 document.addEventListener("keydown", e => {
   if (e.key !== "Escape") return;
@@ -508,7 +599,7 @@ const SESSIONS = [
 ];
 function sessionOpen(o,c,h,m){const t=h*60+m;return o<c?(t>=o*60&&t<c*60):(t>=o*60||t<c*60);}
 function tickSessions() {
-  const now=new Date(), h=now.getUTCHours(), m=now.getUTCMinutes(), s=now.getUTCSeconds();
+  const now=new Date(), h=now.getHours(), m=now.getMinutes(), s=now.getSeconds();
   const p=n=>String(n).padStart(2,"0");
   document.querySelector("#utc-clock b").textContent=`${p(h)}:${p(m)}:${p(s)}`;
   const wknd=now.getUTCDay()===0||now.getUTCDay()===6;
@@ -573,7 +664,7 @@ function startTimer(){
   if(timerInt)clearInterval(timerInt);
   const tick=()=>{
     const lbl=fmtTime(secsLeft(currentTf));
-    CHARTS.forEach(c=>{const el=document.getElementById("timer-"+c.id);if(el)el.textContent=lbl;});
+    document.querySelectorAll(".candle-timer").forEach(el=>el.textContent=lbl);
   };
   tick(); timerInt=setInterval(tick,1000);
 }
@@ -597,7 +688,7 @@ function applyPrice(id,price,pct){
 async function fetchCrypto(){
   try{
     const url=encodeURIComponent("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true");
-    const r=await fetch(PROXY+url); const j=await r.json(); const d=JSON.parse(j.contents);
+    const r=await fetch(PROXY+url); const d=await r.json();
     applyPrice("BTCUSD",d.bitcoin?.usd,d.bitcoin?.usd_24h_change);
     applyPrice("ETHUSD",d.ethereum?.usd,d.ethereum?.usd_24h_change);
   }catch(e){console.warn("CoinGecko:",e);}
@@ -607,19 +698,25 @@ async function fetchTraditional(){
     const syms="^GSPC,^NDX,GC=F,DX-Y.NYB";
     const symMap={"^GSPC":"SPX","^NDX":"NDX","GC=F":"GOLD","DX-Y.NYB":"DXY"};
     const yf=encodeURIComponent(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms}&fields=regularMarketPrice,regularMarketChangePercent`);
-    const r=await fetch(PROXY+yf); const j=await r.json(); const data=JSON.parse(j.contents);
+    const r=await fetch(PROXY+yf); const data=await r.json();
     (data.quoteResponse?.result||[]).forEach(q=>{const id=symMap[q.symbol];if(id)applyPrice(id,q.regularMarketPrice,q.regularMarketChangePercent);});
   }catch(e){console.warn("Yahoo Finance:",e);}
 }
-function fetchPrices(){fetchCrypto();fetchTraditional();}
+function fetchPrices(){Promise.all([fetchCrypto(),fetchTraditional()]).then(checkAlerts);}
 
 // ── Fear & Greed ──────────────────────────────────────────────
 async function fetchFNG(){
-  const URL="https://api.alternative.me/fng/?limit=1";
+  const FNG_URL="https://api.alternative.me/fng/?limit=1";
   let d=null;
-  try{const r=await fetch(URL);d=await r.json();}
-  catch(_){try{const r=await fetch(PROXY+encodeURIComponent(URL));const j=await r.json();d=JSON.parse(j.contents);}catch(e){return;}}
-  const item=d?.data?.[0]; if(!item)return;
+  const attempts=[
+    ()=>fetch(FNG_URL).then(r=>r.json()),
+    ()=>fetch("https://corsproxy.io/?"+encodeURIComponent(FNG_URL)).then(r=>r.json()),
+    ()=>fetch("https://api.allorigins.win/raw?url="+encodeURIComponent(FNG_URL)).then(r=>r.json()),
+  ];
+  for(const attempt of attempts){
+    try{d=await attempt();if(d?.data?.[0])break;}catch(_){}
+  }
+  const item=d?.data?.[0]; if(!item){console.warn("F&G: all sources failed");return;}
   const val=parseInt(item.value), cls=item.value_classification;
   const color=val<=25?"#f85149":val<=45?"#f0883e":val<=55?"#d29922":val<=75?"#3fb950":"#58a6ff";
   const vEl=document.getElementById("fng-val"), cEl=document.getElementById("fng-cls"), fEl=document.getElementById("fng-fill");
@@ -686,7 +783,7 @@ function chgHtml(v) {
 function makeCanvas() {
   const c = document.createElement("canvas");
   c.className = "sr-canvas";
-  c.width = 130; c.height = 44;
+  c.width = 190; c.height = 56;
   return c;
 }
 
@@ -706,24 +803,24 @@ async function fetchStockData(sym) {
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1mo`;
 
   const attempts = [
-    // 1. allorigins /raw — returns JSON directly
+    // 1. corsproxy.io
+    async () => {
+      const r = await fetch("https://corsproxy.io/?" + encodeURIComponent(url));
+      if (!r.ok) throw new Error("cors " + r.status);
+      return await r.json();
+    },
+    // 2. allorigins /raw — returns JSON directly
     async () => {
       const r = await fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(url));
       if (!r.ok) throw new Error("raw " + r.status);
       return await r.json();
     },
-    // 2. allorigins /get — wraps in {contents:"..."}
+    // 3. allorigins /get — wraps in {contents:"..."}
     async () => {
       const r = await fetch("https://api.allorigins.win/get?url=" + encodeURIComponent(url));
       if (!r.ok) throw new Error("get " + r.status);
       const j = await r.json();
       return JSON.parse(j.contents);
-    },
-    // 3. corsproxy.io
-    async () => {
-      const r = await fetch("https://corsproxy.io/?" + encodeURIComponent(url));
-      if (!r.ok) throw new Error("cors " + r.status);
-      return await r.json();
     },
   ];
 
@@ -829,6 +926,145 @@ document.getElementById("stocks-search").addEventListener("input", e => {
 });
 
 // ══════════════════════════════════════════════════════════════
+//  FOREX CHARTS
+// ══════════════════════════════════════════════════════════════
+function fmtForexPrice(p) {
+  if (p == null) return "--";
+  return p >= 50 ? p.toFixed(3) : p.toFixed(5);
+}
+
+function loadForex() {
+  const grid = document.getElementById("forex-grid");
+  grid.innerHTML = "";
+  FOREX_PAIRS.forEach(pair => {
+    const card = document.createElement("div");
+    card.className = "chart-card";
+    card.id = "card-" + pair.id;
+    card.innerHTML = `
+      <div class="chart-title">
+        <span style="font-size:15px;line-height:1;flex-shrink:0">${pair.flags}</span>
+        ${pair.name}
+        <span class="chart-price" id="price-${pair.id}"></span>
+        <span class="chart-chg" id="chg-${pair.id}"></span>
+        <div class="title-actions">
+          <button class="act-btn" data-sym="${pair.id}" title="Set alert">🔔</button>
+          <button class="act-btn fullscreen-btn" data-card="card-${pair.id}" title="Fullscreen">⛶</button>
+        </div>
+      </div>
+      <div class="chart-wrap" id="wrap-${pair.id}">
+        <span class="candle-timer" id="timer-${pair.id}">--:--</span>
+      </div>`;
+    grid.appendChild(card);
+    initChartOverlay(pair.id);
+    buildWidget(pair.id, pair.tvSym, currentTf);
+    fetchStockData(pair.yfSym).then(data => {
+      const meta = data.chart.result[0].meta;
+      const price = meta.regularMarketPrice, prev = meta.chartPreviousClose;
+      const pct = (price != null && prev) ? ((price - prev) / prev * 100) : null;
+      if (price != null) lastPrices[pair.id] = price;
+      const pEl = document.getElementById("price-" + pair.id);
+      const cEl = document.getElementById("chg-"   + pair.id);
+      if (pEl) pEl.textContent = fmtForexPrice(price);
+      if (cEl && pct != null) { cEl.textContent = (pct>=0?"+":"") + pct.toFixed(3) + "%"; cEl.className = "chart-chg " + (pct>=0?"up":"down"); }
+    }).catch(()=>{});
+  });
+}
+
+function renderForex(tf) {
+  FOREX_PAIRS.forEach(p => buildWidget(p.id, p.tvSym, tf));
+}
+
+// ══════════════════════════════════════════════════════════════
+//  COMMODITIES CHARTS
+// ══════════════════════════════════════════════════════════════
+function loadCommodities() {
+  const grid = document.getElementById("commodities-grid");
+  grid.innerHTML = "";
+  COMMODITIES_LIST.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "chart-card";
+    card.id = "card-" + item.id;
+    card.innerHTML = `
+      <div class="chart-title">
+        <span class="chart-dot" style="background:${item.color}"></span>
+        ${item.name}
+        <span class="chart-price" id="price-${item.id}"></span>
+        <span class="chart-chg" id="chg-${item.id}"></span>
+        <span style="font-size:9px;color:var(--text2);margin-left:3px;white-space:nowrap">${item.mcap}</span>
+        <div class="title-actions">
+          <button class="act-btn" data-sym="${item.id}" title="Set alert">🔔</button>
+          <button class="act-btn fullscreen-btn" data-card="card-${item.id}" title="Fullscreen">⛶</button>
+        </div>
+      </div>
+      <div class="chart-wrap" id="wrap-${item.id}">
+        <span class="candle-timer" id="timer-${item.id}">--:--</span>
+      </div>`;
+    grid.appendChild(card);
+    initChartOverlay(item.id);
+    buildWidget(item.id, item.tvSym, currentTf);
+    fetchStockData(item.yfSym).then(data => {
+      const meta = data.chart.result[0].meta;
+      const price = meta.regularMarketPrice, prev = meta.chartPreviousClose;
+      const pct = (price != null && prev) ? ((price - prev) / prev * 100) : null;
+      if (price != null) lastPrices[item.id] = price;
+      const pEl = document.getElementById("price-" + item.id);
+      const cEl = document.getElementById("chg-"   + item.id);
+      if (pEl) pEl.textContent = fmtPx(price);
+      if (cEl && pct != null) { cEl.textContent = (pct>=0?"+":"") + pct.toFixed(2) + "%"; cEl.className = "chart-chg " + (pct>=0?"up":"down"); }
+    }).catch(()=>{});
+  });
+}
+
+function renderCommodities(tf) {
+  COMMODITIES_LIST.forEach(c => buildWidget(c.id, c.tvSym, tf));
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SUB COMMODITIES CHARTS
+// ══════════════════════════════════════════════════════════════
+function loadSubCommodities() {
+  const grid = document.getElementById("subcommodities-grid");
+  grid.innerHTML = "";
+  SUB_COMMODITIES_LIST.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "chart-card";
+    card.id = "card-" + item.id;
+    card.innerHTML = `
+      <div class="chart-title">
+        <span class="chart-dot" style="background:${item.color}"></span>
+        ${item.name}
+        <span class="chart-price" id="price-${item.id}"></span>
+        <span class="chart-chg" id="chg-${item.id}"></span>
+        <span style="font-size:9px;color:var(--text2);margin-left:3px;white-space:nowrap">${item.mcap}</span>
+        <div class="title-actions">
+          <button class="act-btn" data-sym="${item.id}" title="Set alert">🔔</button>
+          <button class="act-btn fullscreen-btn" data-card="card-${item.id}" title="Fullscreen">⛶</button>
+        </div>
+      </div>
+      <div class="chart-wrap" id="wrap-${item.id}">
+        <span class="candle-timer" id="timer-${item.id}">--:--</span>
+      </div>`;
+    grid.appendChild(card);
+    initChartOverlay(item.id);
+    buildWidget(item.id, item.tvSym, currentTf);
+    fetchStockData(item.yfSym).then(data => {
+      const meta = data.chart.result[0].meta;
+      const price = meta.regularMarketPrice, prev = meta.chartPreviousClose;
+      const pct = (price != null && prev) ? ((price - prev) / prev * 100) : null;
+      if (price != null) lastPrices[item.id] = price;
+      const pEl = document.getElementById("price-" + item.id);
+      const cEl = document.getElementById("chg-"   + item.id);
+      if (pEl) pEl.textContent = fmtPx(price);
+      if (cEl && pct != null) { cEl.textContent = (pct>=0?"+":"") + pct.toFixed(2) + "%"; cEl.className = "chart-chg " + (pct>=0?"up":"down"); }
+    }).catch(()=>{});
+  });
+}
+
+function renderSubCommodities(tf) {
+  SUB_COMMODITIES_LIST.forEach(c => buildWidget(c.id, c.tvSym, tf));
+}
+
+// ══════════════════════════════════════════════════════════════
 //  CRYPTO SCREENER
 // ══════════════════════════════════════════════════════════════
 async function loadCrypto() {
@@ -842,8 +1078,7 @@ async function loadCrypto() {
       coins = await r.json();
     } catch(_) {
       const r = await fetch(PROXY + encodeURIComponent(cgUrl));
-      const j = await r.json();
-      coins = JSON.parse(j.contents);
+      coins = await r.json();
     }
 
     body.innerHTML = "";
@@ -895,10 +1130,121 @@ document.getElementById("crypto-search").addEventListener("input", e => {
 });
 
 // ══════════════════════════════════════════════════════════════
+//  CHART DRAW-ALERT OVERLAY
+// ══════════════════════════════════════════════════════════════
+let activeOverlay = null;
+
+function overlayYToPrice(sym, y, h) {
+  const base = lastPrices[sym];
+  if (!base || h === 0) return null;
+  return base * 1.10 - (y / h) * base * 0.20;
+}
+
+function overlayDecimals(sym) {
+  return sym.startsWith("FX_") ? 5 : sym === "BTCUSD" ? 0 : 2;
+}
+function fmtOverlayPrice(sym, p) {
+  if (p == null) return "--";
+  return p.toFixed(overlayDecimals(sym));
+}
+
+function initChartOverlay(symId) {
+  const wrap = document.getElementById("wrap-" + symId);
+  const card = document.getElementById("card-" + symId);
+  if (!wrap || !card || document.getElementById("overlay-" + symId)) return;
+
+  const overlay = document.createElement("div");
+  overlay.className = "chart-overlay";
+  overlay.id = "overlay-" + symId;
+
+  const line  = document.createElement("div"); line.className  = "co-line";
+  const badge = document.createElement("div"); badge.className = "co-badge";
+  const dot   = document.createElement("div"); dot.className   = "co-dot";
+  const hint  = document.createElement("div"); hint.className  = "co-hint";
+  hint.textContent = "click to set alert";
+  overlay.append(line, badge, dot, hint);
+  wrap.appendChild(overlay);
+
+  // Add toggle button to title-actions
+  const actions = card.querySelector(".title-actions");
+  if (actions) {
+    const btn = document.createElement("button");
+    btn.className = "act-btn draw-alert-btn";
+    btn.dataset.drawSym = symId;
+    btn.title = "Draw alert on chart";
+    btn.textContent = "✛";
+    actions.insertBefore(btn, actions.firstChild);
+  }
+
+  overlay.addEventListener("mousemove", e => {
+    const rect = overlay.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    const x = e.clientX - rect.left;
+    const price = overlayYToPrice(symId, y, rect.height);
+
+    line.style.cssText  = `display:block;top:${y}px;`;
+    badge.style.cssText = `display:block;top:${y}px;`;
+    badge.textContent   = fmtOverlayPrice(symId, price);
+    dot.style.cssText   = `display:block;top:${y}px;left:${x}px;`;
+  });
+
+  overlay.addEventListener("mouseleave", () => {
+    line.style.display = badge.style.display = dot.style.display = "none";
+  });
+
+  overlay.addEventListener("click", e => {
+    e.stopPropagation();
+    const rect = overlay.getBoundingClientRect();
+    const price = overlayYToPrice(symId, e.clientY - rect.top, rect.height);
+    exitDrawMode();
+    if (!price) return;
+    const rounded = parseFloat(price.toFixed(overlayDecimals(symId)));
+    const cur = lastPrices[symId];
+    const dir = (cur == null || cur < rounded) ? "above" : "below";
+    alerts.push({sym: symId, dir, price: rounded, id: Date.now()});
+    saveAlerts();
+    checkAlerts();
+    showToast(`🔔 Alert set: ${SYM_NAMES[symId]||symId} crosses ${fmtOverlayPrice(symId, rounded)}`);
+  });
+}
+
+function enterDrawMode(symId) {
+  exitDrawMode();
+  const overlay = document.getElementById("overlay-" + symId);
+  const card    = document.getElementById("card-"    + symId);
+  const btn     = document.querySelector(`.draw-alert-btn[data-draw-sym="${symId}"]`);
+  if (!overlay) return;
+  overlay.classList.add("active");
+  card?.classList.add("draw-mode");
+  btn?.classList.add("draw-active");
+  activeOverlay = symId;
+}
+
+function exitDrawMode() {
+  if (!activeOverlay) return;
+  const overlay = document.getElementById("overlay-" + activeOverlay);
+  const card    = document.getElementById("card-"    + activeOverlay);
+  const btn     = document.querySelector(`.draw-alert-btn[data-draw-sym="${activeOverlay}"]`);
+  overlay?.classList.remove("active");
+  card?.classList.remove("draw-mode");
+  btn?.classList.remove("draw-active");
+  activeOverlay = null;
+}
+
+// ══════════════════════════════════════════════════════════════
 //  ALERTS
 // ══════════════════════════════════════════════════════════════
 let alerts = JSON.parse(localStorage.getItem("mw_alerts") || "[]");
-const SYM_NAMES = {BTCUSD:"BTC/USD",ETHUSD:"ETH/USD",SPX:"S&P 500",NDX:"NASDAQ",GOLD:"XAU/USD",DXY:"DXY"};
+const SYM_NAMES = {
+  BTCUSD:"BTC/USD", ETHUSD:"ETH/USD", SPX:"S&P 500", NDX:"NASDAQ 100", GOLD:"XAU/USD", DXY:"DXY",
+  FX_EURUSD:"EUR/USD", FX_GBPUSD:"GBP/USD", FX_USDJPY:"USD/JPY", FX_USDCHF:"USD/CHF",
+  FX_AUDUSD:"AUD/USD", FX_USDCAD:"USD/CAD", FX_NZDUSD:"NZD/USD", FX_EURGBP:"EUR/GBP",
+  FX_EURJPY:"EUR/JPY", FX_GBPJPY:"GBP/JPY",
+  COM_GOLD:"Gold", COM_SILVER:"Silver", COM_WTI:"WTI Crude", COM_BRENT:"Brent Crude",
+  COM_NG:"Natural Gas", COM_COPPER:"Copper", COM_WHEAT:"Wheat", COM_CORN:"Corn",
+  SUB_PLATINUM:"Platinum", SUB_PALLADIUM:"Palladium", SUB_COCOA:"Cocoa",
+  SUB_COFFEE:"Coffee", SUB_SUGAR:"Sugar", SUB_COTTON:"Cotton", SUB_SOYBEANS:"Soybeans",
+};
 
 function saveAlerts(){localStorage.setItem("mw_alerts",JSON.stringify(alerts));}
 function renderAlerts(){
@@ -907,7 +1253,7 @@ function renderAlerts(){
   list.innerHTML=alerts.map((a,i)=>`
     <div class="al-item">
       <span class="al-sym">${SYM_NAMES[a.sym]||a.sym}</span>
-      <span class="al-cond">${a.dir==="above"?"≥":"≤"}</span>
+      <span class="al-cond">crosses</span>
       <span class="al-price">${a.price.toLocaleString()}</span>
       <button class="al-del" data-i="${i}">✕</button>
     </div>`).join("");
@@ -915,35 +1261,98 @@ function renderAlerts(){
 }
 document.getElementById("al-add-btn").addEventListener("click",()=>{
   const sym=document.getElementById("al-sym").value;
-  const dir=document.getElementById("al-dir").value;
   const price=parseFloat(document.getElementById("al-price").value);
   if(!price||price<=0)return;
+  const cur=lastPrices[sym];
+  const dir=(cur==null||cur<price)?"above":"below";
   alerts.push({sym,dir,price,id:Date.now()});
-  saveAlerts(); renderAlerts();
+  saveAlerts(); checkAlerts(); renderAlerts();
   document.getElementById("al-price").value="";
 });
-document.querySelectorAll(".act-btn[data-sym]").forEach(btn=>{
-  btn.addEventListener("click",()=>{
-    const sym=btn.dataset.sym; if(!sym)return;
-    document.getElementById("al-sym").value=sym;
-    const p=lastPrices[sym];
-    if(p)document.getElementById("al-price").value=p.toFixed(2);
-    document.getElementById("alerts-modal").classList.add("show");
-    renderAlerts();
-  });
+// ── Inline alert popover ─────────────────────────────────────
+function fmtPopHint(sym, p) {
+  if (p == null) return "";
+  const str = sym.startsWith("FX_") ? fmtForexPrice(p) : fmtPx(p);
+  return "Current: " + str;
+}
+function showAlertPop(btn, sym) {
+  const pop = document.getElementById("alert-pop");
+  const rect = btn.getBoundingClientRect();
+  const W = 230, H = 170;
+  let top = rect.bottom + 6, left = rect.left;
+  if (top + H > window.innerHeight - 10) top = rect.top - H - 6;
+  if (left + W > window.innerWidth - 10) left = window.innerWidth - W - 10;
+  if (left < 8) left = 8;
+  pop.style.top = top + "px";
+  pop.style.left = left + "px";
+  const p = lastPrices[sym];
+  document.getElementById("pop-sym-name").textContent = SYM_NAMES[sym] || sym;
+  document.getElementById("pop-cur").textContent = fmtPopHint(sym, p);
+  document.getElementById("pop-price").value = p ? p.toFixed(sym.startsWith("FX_") ? 5 : 2) : "";
+  pop._sym = sym;
+  pop.classList.add("show");
+  setTimeout(() => document.getElementById("pop-price").focus(), 30);
+}
+
+// Event delegation — covers static and dynamically-created buttons
+document.addEventListener("click", e => {
+  const drawBtn = e.target.closest(".draw-alert-btn");
+  if (drawBtn) {
+    const sym = drawBtn.dataset.drawSym;
+    if (activeOverlay === sym) exitDrawMode(); else enterDrawMode(sym);
+    return;
+  }
+  const alertBtn = e.target.closest(".act-btn[data-sym]");
+  if (alertBtn) { showAlertPop(alertBtn, alertBtn.dataset.sym); return; }
+  const pop = document.getElementById("alert-pop");
+  if (pop.classList.contains("show") && !pop.contains(e.target)) pop.classList.remove("show");
 });
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") { exitDrawMode(); document.getElementById("alert-pop").classList.remove("show"); }
+});
+
+document.getElementById("pop-add-btn").addEventListener("click", () => {
+  const pop = document.getElementById("alert-pop");
+  const sym = pop._sym; if (!sym) return;
+  const price = parseFloat(document.getElementById("pop-price").value);
+  if (!price || price <= 0) { document.getElementById("pop-price").focus(); return; }
+  const cur = lastPrices[sym];
+  const dir = (cur == null || cur < price) ? "above" : "below";
+  alerts.push({sym, dir, price, id: Date.now()});
+  saveAlerts();
+  checkAlerts();
+  pop.classList.remove("show");
+  showToast(`🔔 Alert set: ${SYM_NAMES[sym]||sym} crosses ${price.toLocaleString()}`);
+});
+
 document.getElementById("alerts-btn").addEventListener("click",()=>{document.getElementById("alerts-modal").classList.add("show");renderAlerts();});
 document.getElementById("modal-close").addEventListener("click",()=>{document.getElementById("alerts-modal").classList.remove("show");});
 document.getElementById("alerts-modal").addEventListener("click",e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove("show");});
 
 function showToast(msg){const t=document.createElement("div");t.className="toast";t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),5000);}
+
+function playAlertSound(){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    [[880,0,0.15],[1109,0.18,0.15],[880,0.36,0.2]].forEach(([freq,start,dur])=>{
+      const osc=ctx.createOscillator(), gain=ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type="sine"; osc.frequency.value=freq;
+      gain.gain.setValueAtTime(0.35,ctx.currentTime+start);
+      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+start+dur);
+      osc.start(ctx.currentTime+start); osc.stop(ctx.currentTime+start+dur+0.05);
+    });
+  }catch(e){}
+}
+
 function checkAlerts(){
   let changed=false;
   alerts=alerts.filter(a=>{
     const p=lastPrices[a.sym]; if(p==null)return true;
     const hit=(a.dir==="above"&&p>=a.price)||(a.dir==="below"&&p<=a.price);
     if(hit){
-      showToast(`🔔 ${SYM_NAMES[a.sym]} ${a.dir==="above"?"≥":"≤"} ${a.price.toLocaleString()} · now ${p.toLocaleString()}`);
+      playAlertSound();
+      showToast(`🔔 ${SYM_NAMES[a.sym]} crossed ${a.price.toLocaleString()} · now ${p.toLocaleString()}`);
       if(Notification.permission==="granted")new Notification("MarketWatch",{body:`${SYM_NAMES[a.sym]} hit ${a.price.toLocaleString()}`});
       changed=true; return false;
     }
@@ -974,6 +1383,8 @@ function loadCalendar(){
 // ══════════════════════════════════════════════════════════════
 //  BOOT
 // ══════════════════════════════════════════════════════════════
+CHARTS.forEach(c => initChartOverlay(c.id));
+
 const tvScript=document.createElement("script");
 tvScript.src="https://s3.tradingview.com/tv.js";
 tvScript.onload=()=>{renderAll(currentTf);startTimer();};
@@ -981,7 +1392,6 @@ document.head.appendChild(tvScript);
 
 fetchPrices(); fetchFNG(); loadCalendar();
 setInterval(fetchPrices, 15000);
-setInterval(checkAlerts, 15000);
 setInterval(fetchFNG,   300000);
 </script>
 </body>
