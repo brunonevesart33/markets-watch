@@ -587,24 +587,30 @@ function fetchPrices() { fetchCrypto(); fetchTraditional(); }
 
 // ── Fear & Greed ──────────────────────────────────────────────
 async function fetchFNG() {
+  const FNG_URL = "https://api.alternative.me/fng/?limit=1";
+  let d = null;
+  // Try direct first, fall back to proxy
   try {
-    const proxy = "https://api.allorigins.win/get?url=";
-    const url   = encodeURIComponent("https://api.alternative.me/fng/?limit=1");
-    const r = await fetch(proxy + url);
-    const j = await r.json();
-    const d = JSON.parse(j.contents);
-    const item = d.data?.[0]; if (!item) return;
-    const val = parseInt(item.value);
-    const cls = item.value_classification;
-    let color = val <= 25 ? "#f85149" : val <= 45 ? "#f0883e" : val <= 55 ? "#d29922" : val <= 75 ? "#3fb950" : "#58a6ff";
-    const vEl = document.getElementById("fng-val");
-    const cEl = document.getElementById("fng-cls");
-    const fEl = document.getElementById("fng-fill");
-    vEl.textContent = val;   vEl.style.color = color;
-    cEl.textContent = cls;   cEl.style.color = color;
-    fEl.style.width = val + "%";
-    fEl.style.background = color;
-  } catch(e) { console.warn("FNG:", e); }
+    const r = await fetch(FNG_URL);
+    d = await r.json();
+  } catch(_) {
+    try {
+      const r = await fetch("https://api.allorigins.win/get?url=" + encodeURIComponent(FNG_URL));
+      const j = await r.json();
+      d = JSON.parse(j.contents);
+    } catch(e) { console.warn("FNG failed:", e); return; }
+  }
+  const item = d?.data?.[0]; if (!item) return;
+  const val = parseInt(item.value);
+  const cls = item.value_classification;
+  let color = val <= 25 ? "#f85149" : val <= 45 ? "#f0883e" : val <= 55 ? "#d29922" : val <= 75 ? "#3fb950" : "#58a6ff";
+  const vEl = document.getElementById("fng-val");
+  const cEl = document.getElementById("fng-cls");
+  const fEl = document.getElementById("fng-fill");
+  vEl.textContent = val;   vEl.style.color = color;
+  cEl.textContent = cls;   cEl.style.color = color;
+  fEl.style.width = val + "%";
+  fEl.style.background = color;
 }
 
 // ── Alerts ────────────────────────────────────────────────────
