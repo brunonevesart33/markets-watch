@@ -115,8 +115,8 @@
 
     /* Crypto columns: # name price 24h 7d mktcap vol chart */
     .crypto-grid{grid-template-columns:44px 1fr 110px 80px 80px 110px 110px 140px;}
-    /* Stocks columns: # name price 24h mktcap vol chart */
-    .stocks-grid{grid-template-columns:44px 1fr 110px 80px 110px 110px 140px;}
+    /* Stocks columns: # name price 24h vol chart */
+    .stocks-grid{grid-template-columns:44px 1fr 110px 80px 110px 140px;}
 
     .sr-rank{font-size:12px;color:var(--text2);font-weight:600;}
     .sr-name{display:flex;align-items:center;gap:8px;min-width:0;}
@@ -160,7 +160,7 @@
 
     footer{text-align:center;padding:8px;font-size:10px;color:var(--text2);border-top:1px solid var(--border);}
 
-    @media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr);}.bottom-panel{flex-direction:column;}.crypto-grid{grid-template-columns:36px 1fr 90px 70px 90px 130px;}.stocks-grid{grid-template-columns:36px 1fr 90px 70px 90px 130px;}}
+    @media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr);}.bottom-panel{flex-direction:column;}.crypto-grid{grid-template-columns:36px 1fr 90px 70px 90px 130px;}.stocks-grid{grid-template-columns:36px 1fr 90px 70px 90px 110px;}}
     @media(max-width:560px){.grid{grid-template-columns:1fr;}}
   </style>
 </head>
@@ -322,12 +322,11 @@
         <span>Company</span>
         <span style="text-align:right">Price</span>
         <span style="text-align:right">24h</span>
-        <span style="text-align:right">Mkt Cap</span>
         <span style="text-align:right">Volume</span>
         <span style="text-align:right">30d Chart</span>
       </div>
       <div class="screener-body" id="stocks-body">
-        <div class="screener-loading">Loading top 100 stocks…</div>
+        <div class="screener-loading">Loading top 20 stocks…</div>
       </div>
     </div>
   </div>
@@ -404,15 +403,7 @@ const CHARTS = [
 
 const STOCKS_100 = [
   "AAPL","MSFT","NVDA","AMZN","GOOGL","META","TSLA","AVGO","BRK-B","JPM",
-  "LLY","V","UNH","XOM","MA","COST","HD","PG","JNJ","ORCL",
-  "ABBV","BAC","KO","NFLX","MRK","CRM","CVX","AMD","TMO","ADBE",
-  "WMT","ACN","PEP","LIN","MCD","ABT","IBM","TXN","NOW","QCOM",
-  "PM","GE","ISRG","INTU","VZ","NEE","DHR","BKNG","AMGN","MS",
-  "GS","RTX","SPGI","UNP","BLK","AMAT","CAT","SCHW","C","AXP",
-  "PLD","SYK","HON","ADI","LRCX","PANW","VRTX","ETN","MDLZ","CB",
-  "ELV","MU","BSX","DE","REGN","SO","GILD","BMY","TJX","CI",
-  "CME","APH","DUK","PH","MCK","EOG","WM","ICE","NOC","SHW",
-  "MMM","ITW","AON","FCX","ZTS","EMR","HCA","WELL","NSC","PSA"
+  "LLY","V","UNH","XOM","MA","COST","HD","PG","JNJ","ORCL"
 ];
 
 const PROXY = "https://api.allorigins.win/get?url=";
@@ -702,122 +693,132 @@ function makeCanvas() {
 // ══════════════════════════════════════════════════════════════
 //  STOCKS SCREENER
 // ══════════════════════════════════════════════════════════════
-// Lazy sparkline queue
+// Sparkline + price fetch with concurrency limit and retry
 let sparkQueue = [], activeSparkFetches = 0;
-const MAX_SPARK = 3;
+const MAX_SPARK = 4;
 
-function queueSparkline(sym, canvas) {
-  sparkQueue.push({sym, canvas});
+function queueSparkline(sym, canvas, row) {
+  sparkQueue.push({sym, canvas, row, retries: 0});
   drainQueue();
 }
+
+async function fetchStockData(sym) {
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1mo`;
+
+  const attempts = [
+    // 1. allorigins /raw — returns JSON directly
+    async () => {
+      const r = await fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(url));
+      if (!r.ok) throw new Error("raw " + r.status);
+      return await r.json();
+    },
+    // 2. allorigins /get — wraps in {contents:"..."}
+    async () => {
+      const r = await fetch("https://api.allorigins.win/get?url=" + encodeURIComponent(url));
+      if (!r.ok) throw new Error("get " + r.status);
+      const j = await r.json();
+      return JSON.parse(j.contents);
+    },
+    // 3. corsproxy.io
+    async () => {
+      const r = await fetch("https://corsproxy.io/?" + encodeURIComponent(url));
+      if (!r.ok) throw new Error("cors " + r.status);
+      return await r.json();
+    },
+  ];
+
+  for (const attempt of attempts) {
+    try { return await attempt(); } catch(_) {}
+  }
+  throw new Error("All proxies failed: " + sym);
+}
+
 async function drainQueue() {
   if (activeSparkFetches >= MAX_SPARK || sparkQueue.length === 0) return;
-  const {sym, canvas} = sparkQueue.shift();
+  const item = sparkQueue.shift();
+  const {sym, canvas, row} = item;
   activeSparkFetches++;
   try {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1mo`;
-    let closes;
-    try {
-      const r = await fetch(url);
-      const d = await r.json();
-      closes = d.chart.result[0].indicators.quote[0].close;
-    } catch(_) {
-      const r = await fetch(PROXY + encodeURIComponent(url));
-      const j = await r.json();
-      const d = JSON.parse(j.contents);
-      closes = d.chart.result[0].indicators.quote[0].close;
-    }
+    const data   = await fetchStockData(sym);
+    const result = data.chart.result[0];
+    const meta   = result.meta;
+    const closes = result.indicators.quote[0].close;
+
     drawSparkline(canvas, closes);
+
+    if (row) {
+      const price     = meta.regularMarketPrice;
+      const prevClose = meta.chartPreviousClose;
+      const chgPct    = (price != null && prevClose) ? ((price - prevClose) / prevClose * 100) : null;
+      const vol       = meta.regularMarketVolume;
+      const name      = meta.shortName || meta.longName;
+
+      const nameEl = row.querySelector(".sr-name-full");
+      if (nameEl && name) nameEl.textContent = name;
+      row.dataset.search = ((name || sym) + " " + sym).toLowerCase();
+
+      const priceEl = row.querySelector(".sr-price");
+      if (priceEl) priceEl.textContent = fmtPx(price);
+
+      const chgEl = row.querySelector(".sr-chg");
+      if (chgEl) {
+        const up = chgPct != null && chgPct >= 0;
+        chgEl.className = `sr-chg ${up ? "up" : "down"}`;
+        chgEl.textContent = chgPct != null ? (up ? "+" : "") + chgPct.toFixed(2) + "%" : "--";
+      }
+
+      const volEl = row.querySelector(".sr-vol");
+      if (volEl) volEl.textContent = fmtN(vol);
+    }
   } catch(e) {
-    // silently skip if unavailable
+    // retry up to 3 times with increasing delay
+    if (item.retries < 3) {
+      item.retries++;
+      setTimeout(() => { sparkQueue.push(item); drainQueue(); }, 2000 * item.retries);
+    }
   } finally {
     activeSparkFetches--;
     drainQueue();
   }
 }
 
-async function fetchYFBatch(symbols) {
-  const syms   = symbols.join(",");
-  const fields = "regularMarketPrice,regularMarketChangePercent,marketCap,regularMarketVolume,shortName,longName";
-  // Use /raw?url= — returns the JSON directly, no wrapper to parse
-  const url    = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${syms}&fields=${fields}`;
-  const r      = await fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(url));
-  if (!r.ok) throw new Error("proxy " + r.status);
-  const d = await r.json();
-  return d.quoteResponse?.result || [];
-}
-
 async function loadStocks() {
   const body    = document.getElementById("stocks-body");
   const countEl = document.getElementById("stocks-count");
-  const qMap    = {};
 
-  // Sequential batches of 25 — avoids rate-limiting the proxy
-  const BATCH = 25;
-  for (let i = 0; i < STOCKS_100.length; i += BATCH) {
-    try {
-      const slice   = STOCKS_100.slice(i, i + BATCH);
-      const results = await fetchYFBatch(slice);
-      results.forEach(q => { qMap[q.symbol] = q; });
-    } catch(e) { console.warn("Batch failed:", i, e); }
-  }
+  body.innerHTML = "";
 
-  try {
-    body.innerHTML = "";
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (!entry.isIntersecting) return;
-        const row = entry.target;
-        const canvas = row._canvas;
-        if (canvas && !canvas.dataset.queued) {
-          canvas.dataset.queued = "1";
-          observer.unobserve(row);
-          queueSparkline(row.dataset.sym, canvas);
-        }
-      });
-    }, {rootMargin: "120px"});
+  STOCKS_100.forEach((sym, idx) => {
+    const row = document.createElement("div");
+    row.className = "screener-row stocks-grid";
+    row.dataset.sym    = sym;
+    row.dataset.search = sym.toLowerCase();
 
-    STOCKS_100.forEach((sym, idx) => {
-      const q = qMap[sym] || {};
-      const name   = q.shortName || q.longName || sym;
-      const price  = q.regularMarketPrice;
-      const chgPct = q.regularMarketChangePercent;
-      const mktCap = q.marketCap;
-      const vol    = q.regularMarketVolume;
+    const canvas = makeCanvas();
+    row._canvas = canvas;
 
-      const row = document.createElement("div");
-      row.className = "screener-row stocks-grid";
-      row.dataset.sym    = sym;
-      row.dataset.search = (name + " " + sym).toLowerCase();
-
-      const canvas = makeCanvas();
-      row._canvas = canvas;
-
-      row.innerHTML = `
-        <span class="sr-rank">${idx+1}</span>
-        <div class="sr-name">
-          <div class="sr-icon-placeholder">${sym.substring(0,2)}</div>
-          <div class="sr-name-text">
-            <span class="sr-name-full">${name}</span>
-            <span class="sr-sym">${sym}</span>
-          </div>
+    row.innerHTML = `
+      <span class="sr-rank">${idx+1}</span>
+      <div class="sr-name">
+        <div class="sr-icon-placeholder">${sym.substring(0,2)}</div>
+        <div class="sr-name-text">
+          <span class="sr-name-full">${sym}</span>
+          <span class="sr-sym">${sym}</span>
         </div>
-        <span class="sr-price">${fmtPx(price)}</span>
-        ${chgHtml(chgPct)}
-        <span class="sr-num">${fmtN(mktCap)}</span>
-        <span class="sr-num">${fmtN(vol)}</span>
-        <div class="sr-chart"></div>
-      `;
-      row.querySelector(".sr-chart").appendChild(canvas);
-      body.appendChild(row);
-      observer.observe(row);
-    });
+      </div>
+      <span class="sr-price">--</span>
+      <span class="sr-chg">--</span>
+      <span class="sr-num sr-vol">--</span>
+      <div class="sr-chart"></div>
+    `;
+    row.querySelector(".sr-chart").appendChild(canvas);
+    body.appendChild(row);
 
-    countEl.textContent = `${STOCKS_100.length} stocks`;
-  } catch(e) {
-    body.innerHTML = `<div class="screener-loading">Failed to load stocks. Check your connection.</div>`;
-    console.warn("Stocks:", e);
-  }
+    // Stagger requests slightly to avoid hammering the proxy
+    setTimeout(() => queueSparkline(sym, canvas, row), idx * 80);
+  });
+
+  countEl.textContent = `${STOCKS_100.length} stocks`;
 }
 
 document.getElementById("stocks-search").addEventListener("input", e => {
