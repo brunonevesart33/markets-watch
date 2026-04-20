@@ -556,8 +556,11 @@ function applyPrice(id, price, pct) {
 
 async function fetchCrypto() {
   try {
-    const r = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true");
-    const d = await r.json();
+    const proxy = "https://api.allorigins.win/get?url=";
+    const url   = encodeURIComponent("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true");
+    const r = await fetch(proxy + url);
+    const j = await r.json();
+    const d = JSON.parse(j.contents);
     applyPrice("BTCUSD", d.bitcoin?.usd,  d.bitcoin?.usd_24h_change);
     applyPrice("ETHUSD", d.ethereum?.usd, d.ethereum?.usd_24h_change);
   } catch(e) { console.warn("CoinGecko:", e); }
@@ -585,8 +588,11 @@ function fetchPrices() { fetchCrypto(); fetchTraditional(); }
 // ── Fear & Greed ──────────────────────────────────────────────
 async function fetchFNG() {
   try {
-    const r = await fetch("https://api.alternative.me/fng/?limit=1");
-    const d = await r.json();
+    const proxy = "https://api.allorigins.win/get?url=";
+    const url   = encodeURIComponent("https://api.alternative.me/fng/?limit=1");
+    const r = await fetch(proxy + url);
+    const j = await r.json();
+    const d = JSON.parse(j.contents);
     const item = d.data?.[0]; if (!item) return;
     const val = parseInt(item.value);
     const cls = item.value_classification;
