@@ -220,9 +220,6 @@
     .screener-head .sortable.sort-asc::after{content:" ↑";opacity:1;color:var(--accent);}
     .screener-head .sortable.sort-desc::after{content:" ↓";opacity:1;color:var(--accent);}
 
-    /* ── Macro tab ── */
-    .macro-grid{display:grid;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,44vh);gap:10px;padding:10px;}
-
     /* ── Watchlist tab ── */
     .wl-wrap{display:flex;flex-direction:column;flex:1;overflow:hidden;}
     .wl-toolbar{display:flex;align-items:center;gap:8px;padding:10px 18px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap;}
@@ -309,7 +306,6 @@
   <button class="tab-btn" data-tab="commodities">🛢 Commodities</button>
   <button class="tab-btn" data-tab="subcommodities">🌾 Sub Commodities</button>
   <button class="tab-btn" data-tab="btceth">₿ BTC / ETH</button>
-  <button class="tab-btn" data-tab="macro">📉 Macro</button>
   <button class="tab-btn" data-tab="watchlist">⭐ Watchlist</button>
   <button class="tab-btn" data-tab="portfolio">💼 Portfolio</button>
 </nav>
@@ -526,11 +522,6 @@
   </div>
 </div>
 
-<!-- ══════════════════ MACRO TAB ══════════════════ -->
-<div class="tab-panel" id="tab-macro">
-  <div class="macro-grid" id="macro-grid"></div>
-</div>
-
 <!-- ══════════════════ WATCHLIST TAB ══════════════════ -->
 <div class="tab-panel" id="tab-watchlist">
   <div class="wl-wrap">
@@ -679,13 +670,6 @@ const SUB_COMMODITIES_LIST = [
   {id:"SUB_SOYBEANS",  tvSym:"PEPPERSTONE:SOYBEANS",  yfSym:"ZS=F",  name:"Soybeans",  color:"#c8b560", mcap:"—"},
 ];
 
-const MACRO_LIST = [
-  {id:"MACRO_VIX",   tvSym:"CBOE:VIX",  yfSym:"^VIX", name:"VIX",          color:"#e040fb", desc:"Fear Index"},
-  {id:"MACRO_US10Y", tvSym:"TVC:US10Y", yfSym:"^TNX", name:"US 10Y Yield", color:"#4fc3f7", desc:"Treasury"},
-  {id:"MACRO_US02Y", tvSym:"TVC:US02Y", yfSym:"^IRX", name:"US 2Y Yield",  color:"#81d4fa", desc:"Treasury"},
-  {id:"MACRO_US30Y", tvSym:"TVC:US30Y", yfSym:"^TYX", name:"US 30Y Yield", color:"#b3e5fc", desc:"Treasury"},
-];
-
 const PROXY = "https://corsproxy.io/?";
 let currentTf  = "60";
 let isDark     = true;
@@ -696,7 +680,6 @@ let forexLoaded = false;
 let commoditiesLoaded = false;
 let subCommoditiesLoaded = false;
 let btcethLoaded = false;
-let macroLoaded = false;
 let wlLoaded = false;
 let pfLoaded = false;
 
@@ -711,7 +694,7 @@ document.querySelectorAll(".tab-btn").forEach(btn => {
     btn.classList.add("active");
     document.getElementById("tab-" + tab).classList.add("active");
     // Show TF bar on chart tabs
-    document.getElementById("tf-bar").style.display = ["dashboard","forex","commodities","subcommodities","btceth","macro"].includes(tab) ? "flex" : "none";
+    document.getElementById("tf-bar").style.display = ["dashboard","forex","commodities","subcommodities","btceth"].includes(tab) ? "flex" : "none";
     // Lazy-load on first visit
     if (tab === "stocks"         && !stocksLoaded)         { stocksLoaded = true;         loadStocks(); }
     if (tab === "crypto"         && !cryptoLoaded)         { cryptoLoaded = true;         loadCrypto(); }
@@ -719,7 +702,6 @@ document.querySelectorAll(".tab-btn").forEach(btn => {
     if (tab === "commodities"    && !commoditiesLoaded)    { commoditiesLoaded = true;    loadCommodities(); }
     if (tab === "subcommodities" && !subCommoditiesLoaded) { subCommoditiesLoaded = true; loadSubCommodities(); }
     if (tab === "btceth"         && !btcethLoaded)         { btcethLoaded = true;         loadBtcEth(); }
-    if (tab === "macro"          && !macroLoaded)          { macroLoaded = true;          loadMacro(); }
     if (tab === "watchlist"      && !wlLoaded)             { wlLoaded = true;             loadWatchlist(); }
     if (tab === "portfolio"      && !pfLoaded)             { pfLoaded = true;             loadPortfolio(); }
   });
@@ -737,7 +719,6 @@ document.getElementById("theme-btn").addEventListener("click", () => {
   if (commoditiesLoaded)    renderCommodities(currentTf);
   if (subCommoditiesLoaded) renderSubCommodities(currentTf);
   if (btcethLoaded)         renderBtcEth(currentTf);
-  if (macroLoaded)          renderMacro(currentTf);
 });
 
 // ══════════════════════════════════════════════════════════════
@@ -777,7 +758,6 @@ document.querySelectorAll(".tf-btn").forEach(btn => {
     if (commoditiesLoaded)    renderCommodities(btn.dataset.tf);
     if (subCommoditiesLoaded) renderSubCommodities(btn.dataset.tf);
     if (btcethLoaded)         renderBtcEth(btn.dataset.tf);
-    if (macroLoaded)          renderMacro(btn.dataset.tf);
     startTimer();
     btn.blur();
   });
@@ -1472,7 +1452,6 @@ const SYM_NAMES = {
   COM_NG:"Natural Gas", COM_COPPER:"Copper", COM_WHEAT:"Wheat", COM_CORN:"Corn",
   SUB_PLATINUM:"Platinum", SUB_PALLADIUM:"Palladium", SUB_COCOA:"Cocoa",
   SUB_COFFEE:"Coffee", SUB_SUGAR:"Sugar", SUB_COTTON:"Cotton", SUB_SOYBEANS:"Soybeans",
-  MACRO_VIX:"VIX", MACRO_US10Y:"US 10Y Yield", MACRO_US02Y:"US 2Y Yield", MACRO_US30Y:"US 30Y Yield",
 };
 
 const ALERT_INSTRUMENTS = [
@@ -1480,7 +1459,6 @@ const ALERT_INSTRUMENTS = [
   ...FOREX_PAIRS.map(p => ({id:p.id, yfSym:p.yfSym, name:p.name})),
   ...COMMODITIES_LIST.map(c => ({id:c.id, yfSym:c.yfSym, name:c.name})),
   ...SUB_COMMODITIES_LIST.map(c => ({id:c.id, yfSym:c.yfSym, name:c.name})),
-  ...MACRO_LIST.map(m => ({id:m.id, yfSym:m.yfSym, name:m.name})),
 ];
 const ALERT_FEEDS = Object.fromEntries(ALERT_INSTRUMENTS.map(i => [i.id, i]));
 const ALERT_IDS_BY_YF = Object.fromEntries(ALERT_INSTRUMENTS.map(i => [i.yfSym, i.id]));
@@ -1819,51 +1797,6 @@ async function fetchAlertPrices(){
   }).join(" | ");
   setAlertStatus(`Last alert check ${stamp}: ${updated}/${symbols.length} prices updated${failed ? `, ${failed} failed` : ""}. ${sample}`);
   checkAlerts();
-}
-
-// ══════════════════════════════════════════════════════════════
-//  MACRO TAB (VIX + BONDS)
-// ══════════════════════════════════════════════════════════════
-function loadMacro() {
-  const grid = document.getElementById("macro-grid");
-  grid.innerHTML = "";
-  MACRO_LIST.forEach(item => {
-    const card = document.createElement("div");
-    card.className = "chart-card";
-    card.id = "card-" + item.id;
-    card.innerHTML = `
-      <div class="chart-title">
-        <span class="chart-dot" style="background:${item.color}"></span>
-        ${item.name}
-        <span style="font-size:9px;color:var(--text2);margin-left:2px">${item.desc}</span>
-        <span class="chart-price" id="price-${item.id}"></span>
-        <span class="chart-chg" id="chg-${item.id}"></span>
-        <div class="title-actions">
-          <button class="act-btn" data-sym="${item.id}" title="Set alert">🔔</button>
-          <button class="act-btn fullscreen-btn" data-card="card-${item.id}" title="Fullscreen">⛶</button>
-        </div>
-      </div>
-      <div class="chart-wrap" id="wrap-${item.id}">
-        <span class="candle-timer" id="timer-${item.id}">--:--</span>
-      </div>`;
-    grid.appendChild(card);
-    initChartOverlay(item.id);
-    buildWidget(item.id, item.tvSym, currentTf);
-    fetchStockData(item.yfSym).then(data => {
-      const meta = data.chart.result[0].meta;
-      const price = meta.regularMarketPrice, prev = meta.chartPreviousClose;
-      const pct = (price != null && prev) ? ((price - prev) / prev * 100) : null;
-      if (price != null) lastPrices[item.id] = price;
-      const pEl = document.getElementById("price-" + item.id);
-      const cEl = document.getElementById("chg-"   + item.id);
-      if (pEl) pEl.textContent = price != null ? price.toFixed(2) : "--";
-      if (cEl && pct != null) { cEl.textContent = (pct>=0?"+":"") + pct.toFixed(2) + "%"; cEl.className = "chart-chg " + (pct>=0?"up":"down"); }
-    }).catch(()=>{});
-  });
-}
-
-function renderMacro(tf) {
-  MACRO_LIST.forEach(m => buildWidget(m.id, m.tvSym, tf));
 }
 
 // ══════════════════════════════════════════════════════════════
