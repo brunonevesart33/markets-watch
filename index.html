@@ -679,6 +679,13 @@ const SUB_COMMODITIES_LIST = [
   {id:"SUB_SOYBEANS",  tvSym:"PEPPERSTONE:SOYBEANS",  yfSym:"ZS=F",  name:"Soybeans",  color:"#c8b560", mcap:"—"},
 ];
 
+const MACRO_LIST = [
+  {id:"MACRO_VIX",   tvSym:"CBOE:VIX",  yfSym:"^VIX", name:"VIX",          color:"#e040fb", desc:"Fear Index"},
+  {id:"MACRO_US10Y", tvSym:"TVC:US10Y", yfSym:"^TNX", name:"US 10Y Yield", color:"#4fc3f7", desc:"Treasury"},
+  {id:"MACRO_US02Y", tvSym:"TVC:US02Y", yfSym:"^IRX", name:"US 2Y Yield",  color:"#81d4fa", desc:"Treasury"},
+  {id:"MACRO_US30Y", tvSym:"TVC:US30Y", yfSym:"^TYX", name:"US 30Y Yield", color:"#b3e5fc", desc:"Treasury"},
+];
+
 const PROXY = "https://corsproxy.io/?";
 let currentTf  = "60";
 let isDark     = true;
@@ -1817,13 +1824,6 @@ async function fetchAlertPrices(){
 // ══════════════════════════════════════════════════════════════
 //  MACRO TAB (VIX + BONDS)
 // ══════════════════════════════════════════════════════════════
-const MACRO_LIST = [
-  {id:"MACRO_VIX",   tvSym:"CBOE:VIX",  yfSym:"^VIX", name:"VIX",          color:"#e040fb", desc:"Fear Index"},
-  {id:"MACRO_US10Y", tvSym:"TVC:US10Y", yfSym:"^TNX", name:"US 10Y Yield", color:"#4fc3f7", desc:"Treasury"},
-  {id:"MACRO_US02Y", tvSym:"TVC:US02Y", yfSym:"^IRX", name:"US 2Y Yield",  color:"#81d4fa", desc:"Treasury"},
-  {id:"MACRO_US30Y", tvSym:"TVC:US30Y", yfSym:"^TYX", name:"US 30Y Yield", color:"#b3e5fc", desc:"Treasury"},
-];
-
 function loadMacro() {
   const grid = document.getElementById("macro-grid");
   grid.innerHTML = "";
