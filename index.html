@@ -891,15 +891,18 @@ document.querySelectorAll(".tab-btn").forEach(btn => {
     document.getElementById("tab-" + tab).classList.add("active");
     // Show TF bar on chart tabs
     document.getElementById("tf-bar").style.display = ["dashboard","stocks","forex","commodities","subcommodities","btceth"].includes(tab) ? "flex" : "none";
-    // Lazy-load on first visit
-    if (tab === "stocks"         && !stocksLoaded)         { stocksLoaded = true;         loadStocks(); }
-    if (tab === "crypto"         && !cryptoLoaded)         { cryptoLoaded = true;         loadCrypto(); }
-    if (tab === "forex"          && !forexLoaded)          { forexLoaded = true;          loadForex(); }
-    if (tab === "commodities"    && !commoditiesLoaded)    { commoditiesLoaded = true;    loadCommodities(); }
-    if (tab === "subcommodities" && !subCommoditiesLoaded) { subCommoditiesLoaded = true; loadSubCommodities(); }
-    if (tab === "btceth"         && !btcethLoaded)         { btcethLoaded = true;         loadBtcEth(); }
-    if (tab === "watchlist"      && !wlLoaded)             { wlLoaded = true;             loadWatchlist(); }
-    if (tab === "portfolio"      && !pfLoaded)             { pfLoaded = true;             loadPortfolio(); }
+    // Destroy widgets from all other chart tabs to prevent accumulation
+    ["dashboard","stocks","forex","commodities","subcommodities","btceth"].forEach(t => { if (t !== tab) destroyTabWidgets(t); });
+    // Lazy-load on first visit, re-render on revisit
+    if (tab === "stocks")         { if (!stocksLoaded)         { stocksLoaded = true; loadStocks(); }         else renderStocks(currentTf); }
+    if (tab === "crypto"          && !cryptoLoaded)         { cryptoLoaded = true;         loadCrypto(); }
+    if (tab === "forex")          { if (!forexLoaded)          { forexLoaded = true; loadForex(); }          else renderForex(currentTf); }
+    if (tab === "commodities")    { if (!commoditiesLoaded)    { commoditiesLoaded = true; loadCommodities(); }    else renderCommodities(currentTf); }
+    if (tab === "subcommodities") { if (!subCommoditiesLoaded) { subCommoditiesLoaded = true; loadSubCommodities(); } else renderSubCommodities(currentTf); }
+    if (tab === "btceth")         { if (!btcethLoaded)         { btcethLoaded = true; loadBtcEth(); }         else renderBtcEth(currentTf); }
+    if (tab === "dashboard")      { renderAll(currentTf); }
+    if (tab === "watchlist"       && !wlLoaded)             { wlLoaded = true;             loadWatchlist(); }
+    if (tab === "portfolio"       && !pfLoaded)             { pfLoaded = true;             loadPortfolio(); }
   });
 });
 
@@ -941,9 +944,24 @@ function buildWidget(id, symbol, interval) {
     gridColor:       isDark ? "rgba(48,54,61,.5)" : "rgba(208,215,222,.5)",
   });
 }
+function destroyTabWidgets(tab) {
+  const map = {
+    dashboard: () => CHARTS.map(c => c.id),
+    stocks: () => STOCKS_LIST.map(s => s.id),
+    forex: () => FOREX_PAIRS.map(p => p.id),
+    commodities: () => COMMODITIES_LIST.map(c => c.id),
+    subcommodities: () => SUB_COMMODITIES_LIST.map(c => c.id),
+    btceth: () => BTE_COINS.map(c => c.id),
+  };
+  (map[tab] || (() => []))().forEach(id => {
+    const el = document.getElementById("tv_" + id);
+    if (el) el.remove();
+  });
+}
+
 function renderAll(tf) {
   currentTf = tf;
-  CHARTS.forEach(c => buildWidget(c.id, c.symbol, tf));
+  CHARTS.forEach((c, i) => setTimeout(() => buildWidget(c.id, c.symbol, tf), i * 200));
 }
 document.querySelectorAll(".tf-btn").forEach(btn => {
   btn.addEventListener("click", (e) => {
@@ -1211,7 +1229,7 @@ function makeCanvas() {
 function loadStocks() {
   const grid = document.getElementById("stocks-grid");
   grid.innerHTML = "";
-  STOCKS_LIST.forEach(stock => {
+  STOCKS_LIST.forEach((stock, i) => {
     const card = document.createElement("div");
     card.className = "chart-card";
     card.id = "card-" + stock.id;
@@ -1233,7 +1251,7 @@ function loadStocks() {
       </div>`;
     grid.appendChild(card);
     initChartOverlay(stock.id);
-    buildWidget(stock.id, stock.tvSym, currentTf);
+    setTimeout(() => buildWidget(stock.id, stock.tvSym, currentTf), i * 200);
     fetchStockData(stock.yfSym).then(data => {
       const meta = data.chart.result[0].meta;
       const price = meta.regularMarketPrice, prev = meta.chartPreviousClose;
@@ -1251,7 +1269,7 @@ function loadStocks() {
 }
 
 function renderStocks(tf) {
-  STOCKS_LIST.forEach(s => buildWidget(s.id, s.tvSym, tf));
+  STOCKS_LIST.forEach((s, i) => setTimeout(() => buildWidget(s.id, s.tvSym, tf), i * 200));
 }
 
 function queueSparkline() {}  // kept to avoid errors if called
@@ -1305,7 +1323,7 @@ function fmtForexPrice(p) {
 function loadForex() {
   const grid = document.getElementById("forex-grid");
   grid.innerHTML = "";
-  FOREX_PAIRS.forEach(pair => {
+  FOREX_PAIRS.forEach((pair, i) => {
     const card = document.createElement("div");
     card.className = "chart-card";
     card.id = "card-" + pair.id;
@@ -1325,7 +1343,7 @@ function loadForex() {
       </div>`;
     grid.appendChild(card);
     initChartOverlay(pair.id);
-    buildWidget(pair.id, pair.tvSym, currentTf);
+    setTimeout(() => buildWidget(pair.id, pair.tvSym, currentTf), i * 200);
     fetchStockData(pair.yfSym).then(data => {
       const meta = data.chart.result[0].meta;
       const price = meta.regularMarketPrice, prev = meta.chartPreviousClose;
@@ -1342,7 +1360,7 @@ function loadForex() {
 }
 
 function renderForex(tf) {
-  FOREX_PAIRS.forEach(p => buildWidget(p.id, p.tvSym, tf));
+  FOREX_PAIRS.forEach((p, i) => setTimeout(() => buildWidget(p.id, p.tvSym, tf), i * 200));
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -1351,7 +1369,7 @@ function renderForex(tf) {
 function loadCommodities() {
   const grid = document.getElementById("commodities-grid");
   grid.innerHTML = "";
-  COMMODITIES_LIST.forEach(item => {
+  COMMODITIES_LIST.forEach((item, i) => {
     const card = document.createElement("div");
     card.className = "chart-card";
     card.id = "card-" + item.id;
@@ -1372,7 +1390,7 @@ function loadCommodities() {
       </div>`;
     grid.appendChild(card);
     initChartOverlay(item.id);
-    buildWidget(item.id, item.tvSym, currentTf);
+    setTimeout(() => buildWidget(item.id, item.tvSym, currentTf), i * 200);
     fetchStockData(item.yfSym).then(data => {
       const meta = data.chart.result[0].meta;
       const price = meta.regularMarketPrice, prev = meta.chartPreviousClose;
@@ -1387,7 +1405,7 @@ function loadCommodities() {
 }
 
 function renderCommodities(tf) {
-  COMMODITIES_LIST.forEach(c => buildWidget(c.id, c.tvSym, tf));
+  COMMODITIES_LIST.forEach((c, i) => setTimeout(() => buildWidget(c.id, c.tvSym, tf), i * 200));
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -1396,7 +1414,7 @@ function renderCommodities(tf) {
 function loadSubCommodities() {
   const grid = document.getElementById("subcommodities-grid");
   grid.innerHTML = "";
-  SUB_COMMODITIES_LIST.forEach(item => {
+  SUB_COMMODITIES_LIST.forEach((item, i) => {
     const card = document.createElement("div");
     card.className = "chart-card";
     card.id = "card-" + item.id;
@@ -1417,7 +1435,7 @@ function loadSubCommodities() {
       </div>`;
     grid.appendChild(card);
     initChartOverlay(item.id);
-    buildWidget(item.id, item.tvSym, currentTf);
+    setTimeout(() => buildWidget(item.id, item.tvSym, currentTf), i * 200);
     fetchStockData(item.yfSym).then(data => {
       const meta = data.chart.result[0].meta;
       const price = meta.regularMarketPrice, prev = meta.chartPreviousClose;
@@ -1432,7 +1450,7 @@ function loadSubCommodities() {
 }
 
 function renderSubCommodities(tf) {
-  SUB_COMMODITIES_LIST.forEach(c => buildWidget(c.id, c.tvSym, tf));
+  SUB_COMMODITIES_LIST.forEach((c, i) => setTimeout(() => buildWidget(c.id, c.tvSym, tf), i * 200));
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -2641,15 +2659,15 @@ const BTE_COINS = [
 ];
 
 function loadBtcEth() {
-  BTE_COINS.forEach(c => {
+  BTE_COINS.forEach((c, i) => {
     initChartOverlay(c.id);
-    buildWidget(c.id, c.tvSym, currentTf);
+    setTimeout(() => buildWidget(c.id, c.tvSym, currentTf), i * 200);
   });
   fetchBtcEthMetrics();
 }
 
 function renderBtcEth(tf) {
-  BTE_COINS.forEach(c => buildWidget(c.id, c.tvSym, tf));
+  BTE_COINS.forEach((c, i) => setTimeout(() => buildWidget(c.id, c.tvSym, tf), i * 200));
 }
 
 function fmtBteChg(v) {

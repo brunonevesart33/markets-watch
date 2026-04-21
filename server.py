@@ -2,7 +2,7 @@ import json
 import time
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.error import HTTPError, URLError
-from urllib.parse import parse_qs, quote, urlparse
+from urllib.parse import parse_qs, quote, unquote, urlparse
 from urllib.request import Request, urlopen
 
 
@@ -78,7 +78,7 @@ class Handler(SimpleHTTPRequestHandler):
                 return
 
             if parsed.path.startswith("/api/yahoo/chart/"):
-                symbol = parsed.path.rsplit("/", 1)[-1]
+                symbol = unquote(parsed.path.rsplit("/", 1)[-1])
                 interval = qs.get("interval", ["1d"])[0]
                 range_ = qs.get("range", ["1mo"])[0]
                 url = (
