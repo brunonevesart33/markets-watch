@@ -366,6 +366,52 @@
 
     @media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr);}.bottom-panel{flex-direction:column;}.crypto-grid{grid-template-columns:36px 1fr 90px 70px 90px 130px;}.stocks-grid{grid-template-columns:36px 1fr 90px 70px 90px 110px;}.btceth-charts,.btceth-metrics{grid-template-columns:1fr;}.bte-stats{grid-template-columns:repeat(2,1fr);}}
     @media(max-width:560px){.grid{grid-template-columns:1fr;}}
+
+    /* ── Wyckoff Tab ── */
+    #tab-wyckoff{flex:1;min-height:0;}
+    .wyk-wrap{display:flex;flex-direction:column;flex:1;min-height:0;}
+    .wyk-controls{display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--bg2);border-bottom:1px solid var(--border);flex-wrap:wrap;flex-shrink:0;}
+    .wyk-cat-group,.wyk-tf-group{display:flex;gap:4px;flex-shrink:0;}
+    .wyk-sym-scroll{display:flex;gap:4px;overflow-x:auto;flex:1;min-width:0;scrollbar-width:none;}
+    .wyk-sym-scroll::-webkit-scrollbar{display:none;}
+    .wyk-cat-btn,.wyk-sym-btn,.wyk-tf-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0;}
+    .wyk-cat-btn:hover,.wyk-sym-btn:hover,.wyk-tf-btn:hover{border-color:var(--accent);color:var(--accent);}
+    .wyk-cat-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+    .wyk-sym-btn.active{background:rgba(88,166,255,.18);border-color:var(--accent);color:var(--accent);}
+    .wyk-tf-btn.active{border-color:var(--accent);color:var(--accent);}
+    .wyk-sep{width:1px;height:20px;background:var(--border);flex-shrink:0;align-self:center;}
+    .wyk-body{display:flex;flex:1;min-height:0;}
+    .wyk-chart-area{flex:1;position:relative;min-height:0;}
+    /* Info panel */
+    .wyk-info{width:250px;flex-shrink:0;overflow-y:auto;background:var(--bg2);border-left:1px solid var(--border);font-size:11px;display:flex;flex-direction:column;transition:width .2s;}
+    .wyk-info.collapsed{width:0;overflow:hidden;}
+    .wyk-info-toggle{position:absolute;right:0;top:50%;transform:translateY(-50%);z-index:10;background:var(--bg3);border:1px solid var(--border);border-right:none;color:var(--text2);cursor:pointer;padding:8px 4px;border-radius:5px 0 0 5px;font-size:11px;line-height:1;}
+    .wyk-section{padding:10px 12px;border-bottom:1px solid var(--border);}
+    .wyk-section-title{font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
+    .wyk-phase{display:flex;gap:6px;margin-bottom:6px;align-items:flex-start;}
+    .wyk-phase-badge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;flex-shrink:0;margin-top:1px;}
+    .wyk-phase-text{color:var(--text2);line-height:1.5;}
+    .wyk-event{display:flex;gap:6px;margin-bottom:4px;align-items:baseline;}
+    .wyk-event-tag{font-size:9px;font-weight:700;min-width:36px;flex-shrink:0;}
+    .wyk-event-desc{color:var(--text2);font-size:10px;line-height:1.4;}
+    .wyk-setup-row{display:flex;gap:6px;margin-bottom:5px;align-items:baseline;}
+    .wyk-setup-label{font-size:9px;font-weight:700;color:var(--text2);min-width:50px;flex-shrink:0;text-transform:uppercase;}
+    .wyk-setup-val{font-size:10px;line-height:1.4;}
+    .wyk-law{margin-bottom:7px;}
+    .wyk-law-name{font-weight:700;color:var(--text);margin-bottom:2px;}
+    .wyk-law-desc{color:var(--text2);line-height:1.4;}
+    /* script modal */
+    .wyk-modal{display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.8);align-items:center;justify-content:center;}
+    .wyk-modal.open{display:flex;}
+    .wyk-modal-box{background:var(--bg2);border:1px solid var(--border);border-radius:10px;width:min(740px,96vw);max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.6);}
+    .wyk-modal-hd{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--border);flex-shrink:0;}
+    .wyk-modal-title{font-size:14px;font-weight:700;color:var(--text);}
+    .wyk-modal-steps{padding:11px 16px;background:var(--bg3);border-bottom:1px solid var(--border);font-size:12px;line-height:1.9;color:var(--text2);flex-shrink:0;}
+    .wyk-modal-steps b{color:var(--text);}
+    .wyk-modal-steps kbd{background:var(--border);color:var(--text);padding:1px 5px;border-radius:3px;font-size:10px;}
+    .wyk-code-wrap{flex:1;overflow-y:auto;padding:12px 14px;}
+    .wyk-code{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:14px;font-family:"Courier New",Courier,monospace;font-size:11px;line-height:1.55;color:#a9dc76;white-space:pre;overflow-x:auto;cursor:text;user-select:all;}
+    .wyk-modal-ft{padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;}
   </style>
 </head>
 <body>
@@ -414,6 +460,7 @@
   <button class="tab-btn" data-tab="btceth">₿ BTC / ETH</button>
   <button class="tab-btn" data-tab="watchlist">⭐ Watchlist</button>
   <button class="tab-btn" data-tab="portfolio">💼 Portfolio</button>
+  <button class="tab-btn" data-tab="wyckoff">📐 Wyckoff</button>
 </nav>
 
 <!-- ══════════════════ DASHBOARD TAB ══════════════════ -->
@@ -676,6 +723,155 @@
   </div>
 </div>
 
+<!-- ══════════════════ WYCKOFF TAB ══════════════════ -->
+<div class="tab-panel" id="tab-wyckoff">
+  <div class="wyk-wrap">
+
+    <!-- Controls bar -->
+    <div class="wyk-controls">
+      <div class="wyk-cat-group">
+        <button class="wyk-cat-btn active" data-wyk-cat="crypto">₿ Crypto</button>
+        <button class="wyk-cat-btn" data-wyk-cat="stocks">📈 Stocks</button>
+        <button class="wyk-cat-btn" data-wyk-cat="forex">💱 Forex</button>
+        <button class="wyk-cat-btn" data-wyk-cat="commodities">🛢 Commodities</button>
+      </div>
+      <div class="wyk-sep"></div>
+      <div class="wyk-sym-scroll" id="wyk-sym-group"></div>
+      <div class="wyk-sep"></div>
+      <div class="wyk-tf-group">
+        <button class="wyk-tf-btn" data-wyk-tf="1">1m</button>
+        <button class="wyk-tf-btn" data-wyk-tf="5">5m</button>
+        <button class="wyk-tf-btn" data-wyk-tf="15">15m</button>
+        <button class="wyk-tf-btn" data-wyk-tf="60">1h</button>
+        <button class="wyk-tf-btn" data-wyk-tf="240">4h</button>
+        <button class="wyk-tf-btn active" data-wyk-tf="D">1D</button>
+        <button class="wyk-tf-btn" data-wyk-tf="W">1W</button>
+      </div>
+      <div class="wyk-sep"></div>
+      <button class="wyk-tf-btn" id="wyk-panel-toggle" title="Mostrar/esconder guia">&#9776; Guia</button>
+      <button class="wyk-tf-btn" id="wyk-script-btn" title="Ver e copiar Pine Script">&#128203; Script</button>
+    </div>
+
+    <!-- Body: chart + info panel -->
+    <div class="wyk-body">
+
+      <!-- Chart -->
+      <div class="wyk-chart-area">
+        <div id="wrap-WYCKOFF" style="position:absolute;inset:0;width:100%;height:100%;"></div>
+      </div>
+
+      <!-- Info panel -->
+      <div class="wyk-info" id="wyk-info-panel">
+
+        <!-- ACUMULAÇÃO -->
+        <div class="wyk-section">
+          <div class="wyk-section-title" style="color:#22c55e">Acumulação — Fases</div>
+          <div class="wyk-phase">
+            <span class="wyk-phase-badge" style="background:rgba(34,197,94,.2);color:#22c55e">A</span>
+            <span class="wyk-phase-text">Mudança de carácter bearish→bullish. Aparece <b>PS</b>, <b>SC</b> e <b>AR</b>.</span>
+          </div>
+          <div class="wyk-phase">
+            <span class="wyk-phase-badge" style="background:rgba(34,197,94,.15);color:#22c55e">B</span>
+            <span class="wyk-phase-text">Equilíbrio oferta/demanda. Preço oscila entre suporte e resistência com <b>ST</b>s.</span>
+          </div>
+          <div class="wyk-phase">
+            <span class="wyk-phase-badge" style="background:rgba(34,197,94,.15);color:#22c55e">C</span>
+            <span class="wyk-phase-text">Equilíbrio termina. <b>Spring</b> — falsa quebra abaixo do suporte, elimina stops.</span>
+          </div>
+          <div class="wyk-phase">
+            <span class="wyk-phase-badge" style="background:rgba(34,197,94,.15);color:#22c55e">D</span>
+            <span class="wyk-phase-text">Breakout inicia. <b>JAC</b> (Jump Across Creek) — força compradora domina.</span>
+          </div>
+          <div class="wyk-phase">
+            <span class="wyk-phase-badge" style="background:rgba(34,197,94,.15);color:#22c55e">E</span>
+            <span class="wyk-phase-text">Confirmação final. Back-to-Creek confirma demanda dominante. Mark-up.</span>
+          </div>
+        </div>
+
+        <!-- EVENTOS ACUMULAÇÃO -->
+        <div class="wyk-section">
+          <div class="wyk-section-title" style="color:#22c55e">Eventos — Acumulação</div>
+          <div class="wyk-event"><span class="wyk-event-tag" style="color:#ef4444">PS</span><span class="wyk-event-desc">Preliminary Support — compra significativa aparece, suporte provisório.</span></div>
+          <div class="wyk-event"><span class="wyk-event-tag" style="color:#ef4444">SC</span><span class="wyk-event-desc">Selling Climax — pânico máximo. Volume alto, bar larga, fecha perto do mínimo.</span></div>
+          <div class="wyk-event"><span class="wyk-event-tag" style="color:#3b82f6">AR</span><span class="wyk-event-desc">Automatic Rally — recuperação lógica após SC. Define topo do range.</span></div>
+          <div class="wyk-event"><span class="wyk-event-tag" style="color:#a78bfa">ST</span><span class="wyk-event-desc">Secondary Test — reteste do SC com volume menor. Confirma suporte.</span></div>
+          <div class="wyk-event"><span class="wyk-event-tag" style="color:#22c55e">Spring</span><span class="wyk-event-desc">Falsa quebra abaixo do suporte. Bear trap — sinal de LONG.</span></div>
+          <div class="wyk-event"><span class="wyk-event-tag" style="color:#60a5fa">SOS</span><span class="wyk-event-desc">Sign of Strength — forte alta com volume após Spring/ST.</span></div>
+          <div class="wyk-event"><span class="wyk-event-tag" style="color:#34d399">LPS</span><span class="wyk-event-desc">Last Point of Support — pequeno pullback, baixo volume. Entrada de compra.</span></div>
+        </div>
+
+        <!-- DISTRIBUIÇÃO -->
+        <div class="wyk-section">
+          <div class="wyk-section-title" style="color:#ef4444">Distribuição — Eventos</div>
+          <div class="wyk-event"><span class="wyk-event-tag" style="color:#f97316">SY</span><span class="wyk-event-desc">Preliminary Supply — primeira pressão vendedora. Resistência provisória.</span></div>
+          <div class="wyk-event"><span class="wyk-event-tag" style="color:#ef4444">BC</span><span class="wyk-event-desc">Buying Climax — euforia máxima. Volume alto, bar larga, fecha perto do máximo.</span></div>
+          <div class="wyk-event"><span class="wyk-event-tag" style="color:#f97316">AR</span><span class="wyk-event-desc">Automatic Reaction — queda após BC. Define fundo do range de distribuição (ICE).</span></div>
+          <div class="wyk-event"><span class="wyk-event-tag" style="color:#a78bfa">ST</span><span class="wyk-event-desc">Secondary Test — reteste do BC com volume menor. Confirma resistência.</span></div>
+          <div class="wyk-event"><span class="wyk-event-tag" style="color:#ef4444">UTAD</span><span class="wyk-event-desc">Upthrust After Distribution — falsa quebra acima da resistência. Bull trap — SHORT.</span></div>
+          <div class="wyk-event"><span class="wyk-event-tag" style="color:#f87171">SOW</span><span class="wyk-event-desc">Sign of Weakness — forte queda com volume. Breakout do ICE confirmado.</span></div>
+          <div class="wyk-event"><span class="wyk-event-tag" style="color:#fca5a5">LPSY</span><span class="wyk-event-desc">Last Point of Supply — pequeno rally, baixo volume. Entrada de venda.</span></div>
+        </div>
+
+        <!-- SETUP SPRING -->
+        <div class="wyk-section">
+          <div class="wyk-section-title" style="color:#f59e0b">Setup Spring — Entrada</div>
+          <div class="wyk-setup-row"><span class="wyk-setup-label">Entrada</span><span class="wyk-setup-val">Quando preço volta ao range após o Spring — demanda confirmada.</span></div>
+          <div class="wyk-setup-row"><span class="wyk-setup-label">Stop Loss</span><span class="wyk-setup-val" style="color:#ef4444">Abaixo do mínimo do Spring. Invalida a hipótese.</span></div>
+          <div class="wyk-setup-row"><span class="wyk-setup-label">Alvo</span><span class="wyk-setup-val">Zona do Creek/AR (resistência do range).</span></div>
+          <div class="wyk-setup-row"><span class="wyk-setup-label">R:R mínimo</span><span class="wyk-setup-val" style="color:#22c55e;font-weight:700">3 : 1</span></div>
+          <div class="wyk-setup-row"><span class="wyk-setup-label">Volume</span><span class="wyk-setup-val">Spring com volume moderado + SOS com volume crescente = ideal.</span></div>
+        </div>
+
+        <!-- 3 LEIS -->
+        <div class="wyk-section">
+          <div class="wyk-section-title">3 Leis de Wyckoff</div>
+          <div class="wyk-law">
+            <div class="wyk-law-name">1 — Oferta & Demanda</div>
+            <div class="wyk-law-desc">Preço sobe quando demanda > oferta. Cai quando oferta > demanda.</div>
+          </div>
+          <div class="wyk-law">
+            <div class="wyk-law-name">2 — Causa & Efeito</div>
+            <div class="wyk-law-desc">O tamanho do range (acumulação/distribuição) determina o tamanho do movimento seguinte.</div>
+          </div>
+          <div class="wyk-law">
+            <div class="wyk-law-name">3 — Esforço & Resultado</div>
+            <div class="wyk-law-desc">Volume (esforço) deve confirmar o preço (resultado). Divergência = alerta.</div>
+          </div>
+        </div>
+
+      </div><!-- /wyk-info -->
+    </div><!-- /wyk-body -->
+
+  </div><!-- /wyk-wrap -->
+</div>
+
+<!-- ── Wyckoff Script Modal ── -->
+<div class="wyk-modal" id="wyk-script-modal">
+  <div class="wyk-modal-box">
+    <div class="wyk-modal-hd">
+      <span class="wyk-modal-title">📐 Wyckoff Method Detector — Pine Script v6</span>
+      <button class="modal-x" id="wyk-modal-close">✕</button>
+    </div>
+    <div class="wyk-modal-steps">
+      <b>O Pine Editor só existe no TradingView.com</b> — o widget embed não o tem.<br>
+      1. Clica <b>📋 Copiar Script</b> &nbsp;→&nbsp;
+      2. Clica <b>Abrir TradingView</b> (abre o símbolo actual) &nbsp;→&nbsp;
+      3. Em baixo do gráfico clica <b>Pine Editor</b> &nbsp;→&nbsp;
+      4. <kbd>Ctrl+A</kbd> <kbd>Ctrl+V</kbd> para colar &nbsp;→&nbsp;
+      5. Clica <b>Add to chart</b> &nbsp;→&nbsp;
+      6. <b>Save</b> para guardar na tua conta e usar sempre
+    </div>
+    <div class="wyk-code-wrap">
+      <pre class="wyk-code" id="wyk-code-block"></pre>
+    </div>
+    <div class="wyk-modal-ft">
+      <button class="btn-primary" id="wyk-copy-btn">📋 Copiar Script</button>
+      <a id="wyk-tv-link" href="https://www.tradingview.com/chart/" target="_blank" rel="noopener" class="btn-primary" style="text-decoration:none">&#127758; Abrir TradingView</a>
+      <button class="icon-btn" id="wyk-modal-close2">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── Inline alert popover ── -->
 <div class="alert-pop" id="alert-pop">
   <div class="pop-title">🔔 <span id="pop-sym-name"></span></div>
@@ -865,6 +1061,248 @@ const CRYPTO_CG_IDS = {
   ICP:"internet-computer",HBAR:"hedera-hashgraph",XLM:"stellar",
 };
 
+const WYCKOFF_PINE_SCRIPT = `//@version=6
+indicator("Wyckoff Detector", overlay = true, max_labels_count = 500, max_lines_count = 500)
+
+// --- INPUTS ---
+grp1 = "Detection"
+trendLen   = input.int(50,    "Trend EMA Period",    minval = 20,  maxval = 200, group = grp1)
+volLen     = input.int(20,    "Volume MA Period",     minval = 5,   maxval = 100, group = grp1)
+atrLen     = input.int(14,    "ATR Period",           minval = 5,   maxval = 50,  group = grp1)
+climaxMult = input.float(2.5, "Climax Volume x Avg",  minval = 1.5, maxval = 6.0, step = 0.1, group = grp1)
+highMult   = input.float(1.5, "High Volume x Avg",    minval = 1.0, maxval = 3.0, step = 0.1, group = grp1)
+lowMult    = input.float(0.7, "Low Volume x Avg",     minval = 0.2, maxval = 0.9, step = 0.1, group = grp1)
+
+grp2 = "Display"
+showPhase  = input.bool(true,  "Phase Labels",  group = grp2)
+showEvents = input.bool(true,  "Event Labels",  group = grp2)
+showLines  = input.bool(true,  "Key Levels",    group = grp2)
+showTrend  = input.bool(false, "Trend EMAs",    group = grp2)
+
+// --- BASE CALCULATIONS ---
+atrVal  = ta.atr(atrLen)
+avgVol  = ta.sma(volume, volLen)
+slowEMA = ta.ema(close, trendLen)
+fastEMA = ta.ema(close, trendLen / 2)
+
+bullTrend = fastEMA > slowEMA
+bearTrend = fastEMA < slowEMA
+
+climaxVol = volume >= avgVol * climaxMult
+highVol   = volume >= avgVol * highMult
+lowVol    = volume <= avgVol * lowMult
+
+barRng    = high - low
+avgRng    = ta.sma(barRng, volLen)
+wideBar   = barRng > avgRng * 1.5
+narrowBar = barRng < avgRng * 0.6
+bullBar   = close > open
+bearBar   = close < open
+closePct  = barRng > 0 ? (close - low) / barRng : 0.5
+
+// Pre-calculated unconditionally (Pine v6 requirement)
+h3 = ta.highest(close, 3)[1]
+l3 = ta.lowest(close, 3)[1]
+
+// --- STATE ---
+var int   phase     = 0
+var float sc_low    = na
+var float ar_high   = na
+var float bc_high   = na
+var float ar_low    = na
+var bool  had_sc    = false
+var bool  had_bc    = false
+var bool  had_ar_up = false
+var bool  had_ar_dn = false
+var int   lastPhase = 0
+
+// --- EVENT DETECTION ---
+SC     = bearTrend and bearBar and climaxVol and wideBar and closePct < 0.25
+BC     = bullTrend and bullBar and climaxVol and wideBar and closePct > 0.75
+AR_up  = had_sc  and not had_ar_up and bullBar and highVol and not climaxVol and close > h3
+AR_dn  = had_bc  and not had_ar_dn and bearBar and highVol and not climaxVol and close < l3
+ST_acc = phase == 1 and had_ar_up and not na(sc_low)  and low  >= sc_low  * 0.985 and low  <= sc_low  * 1.015 and lowVol and not SC
+ST_dist= phase == 3 and had_ar_dn and not na(bc_high) and high >= bc_high * 0.985 and high <= bc_high * 1.015 and lowVol and not BC
+Spring = phase == 1 and not na(sc_low)  and low  < sc_low  * 0.997 and close > sc_low  * 1.003 and bullBar and highVol
+UTAD   = phase == 3 and not na(bc_high) and high > bc_high * 1.003 and close < bc_high * 0.997 and bearBar and highVol
+SOS    = phase == 1 and not na(ar_high) and bullBar and highVol and wideBar and close > ar_high and closePct > 0.70
+SOW    = phase == 3 and not na(ar_low)  and bearBar and highVol and wideBar and close < ar_low  and closePct < 0.30
+
+// --- STATE UPDATES ---
+if SC
+    had_sc    := true
+    sc_low    := low
+    phase     := 1
+    had_ar_up := false
+if BC
+    had_bc    := true
+    bc_high   := high
+    phase     := 3
+    had_ar_dn := false
+if AR_up
+    had_ar_up := true
+    ar_high   := high
+if AR_dn
+    had_ar_dn := true
+    ar_low    := low
+if SOS
+    phase := 2
+if SOW
+    phase := 4
+
+// --- PHASE LABEL (appears on transition, minimal gray) ---
+phaseStr = phase == 1 ? "Accumulation" :
+           phase == 2 ? "Mark-Up"      :
+           phase == 3 ? "Distribution" :
+           phase == 4 ? "Mark-Down"    : ""
+
+if showPhase and phase != 0 and phase != lastPhase
+    label.new(bar_index, high + atrVal * 2.5, phaseStr,
+      style     = label.style_label_down,
+      color     = color.new(color.gray, 55),
+      textcolor = color.white,
+      size      = size.small)
+    lastPhase := phase
+
+// --- EVENT LABELS (minimal gray) ---
+cGray = color.new(color.gray, 25)
+cKey  = color.new(color.silver, 10)
+
+if showEvents
+    if SC
+        label.new(bar_index, low - atrVal * 0.5, "SC",
+          style = label.style_label_up, color = cGray, textcolor = color.white, size = size.small,
+          tooltip = "Selling Climax | Climax volume + wide bear bar closing near lows")
+    if BC
+        label.new(bar_index, high + atrVal * 0.5, "BC",
+          style = label.style_label_down, color = cGray, textcolor = color.white, size = size.small,
+          tooltip = "Buying Climax | Climax volume + wide bull bar closing near highs")
+    if AR_up
+        label.new(bar_index, high + atrVal * 0.3, "AR",
+          style = label.style_label_down, color = cGray, textcolor = color.white, size = size.small,
+          tooltip = "Automatic Rally | First recovery after SC. Defines range top.")
+    if AR_dn
+        label.new(bar_index, low - atrVal * 0.3, "AR",
+          style = label.style_label_up, color = cGray, textcolor = color.white, size = size.small,
+          tooltip = "Automatic Reaction | First drop after BC. Defines range bottom.")
+    if ST_acc
+        label.new(bar_index, low - atrVal * 0.3, "ST",
+          style = label.style_label_up, color = cGray, textcolor = color.white, size = size.small,
+          tooltip = "Secondary Test (Acc) | Retest of SC area on lower volume.")
+    if ST_dist
+        label.new(bar_index, high + atrVal * 0.3, "ST",
+          style = label.style_label_down, color = cGray, textcolor = color.white, size = size.small,
+          tooltip = "Secondary Test (Dist) | Retest of BC area on lower volume.")
+    if Spring
+        label.new(bar_index, low - atrVal * 0.8, "Spring",
+          style = label.style_label_up, color = cKey, textcolor = color.black, size = size.normal,
+          tooltip = "Spring | Bear trap below support. Close back above SC low -> Long.")
+    if UTAD
+        label.new(bar_index, high + atrVal * 0.8, "UTAD",
+          style = label.style_label_down, color = cKey, textcolor = color.black, size = size.normal,
+          tooltip = "UTAD | Bull trap above resistance. Close back below BC high -> Short.")
+    if SOS
+        label.new(bar_index, high + atrVal * 0.3, "SOS",
+          style = label.style_label_down, color = cGray, textcolor = color.white, size = size.small,
+          tooltip = "Sign of Strength | Strong rally on volume. Mark-Up starting.")
+    if SOW
+        label.new(bar_index, low - atrVal * 0.3, "SOW",
+          style = label.style_label_up, color = cGray, textcolor = color.white, size = size.small,
+          tooltip = "Sign of Weakness | Strong drop on volume. Mark-Down starting.")
+
+// --- KEY LEVEL LINES (thin dashed gray) ---
+var line ln_sc  = na
+var line ln_ar  = na
+var line ln_bc  = na
+var line ln_arn = na
+
+if showLines
+    if SC
+        if not na(ln_sc)
+            line.delete(ln_sc)
+        ln_sc := line.new(bar_index, sc_low, bar_index + 1, sc_low,
+                  extend = extend.right, color = color.new(color.gray, 40), style = line.style_dashed, width = 1)
+    if AR_up
+        if not na(ln_ar)
+            line.delete(ln_ar)
+        ln_ar := line.new(bar_index, ar_high, bar_index + 1, ar_high,
+                  extend = extend.right, color = color.new(color.gray, 40), style = line.style_dashed, width = 1)
+    if BC
+        if not na(ln_bc)
+            line.delete(ln_bc)
+        ln_bc := line.new(bar_index, bc_high, bar_index + 1, bc_high,
+                  extend = extend.right, color = color.new(color.gray, 40), style = line.style_dashed, width = 1)
+    if AR_dn
+        if not na(ln_arn)
+            line.delete(ln_arn)
+        ln_arn := line.new(bar_index, ar_low, bar_index + 1, ar_low,
+                   extend = extend.right, color = color.new(color.gray, 40), style = line.style_dashed, width = 1)
+
+// --- TREND EMAs (hidden by default) ---
+plot(showTrend ? slowEMA : na, "EMA Slow", color = color.new(color.gray, 40), linewidth = 1)
+plot(showTrend ? fastEMA : na, "EMA Fast", color = color.new(color.gray, 60), linewidth = 1)
+
+// --- ALERTS ---
+alertcondition(SC,     "SC",     "Selling Climax detected")
+alertcondition(BC,     "BC",     "Buying Climax detected")
+alertcondition(Spring, "Spring", "Spring - Long opportunity")
+alertcondition(UTAD,   "UTAD",   "UTAD - Short opportunity")
+alertcondition(SOS,    "SOS",    "Sign of Strength - Mark-Up starting")
+alertcondition(SOW,    "SOW",    "Sign of Weakness - Mark-Down starting")`;
+
+const WYCKOFF_SYMBOLS = {
+  crypto: [
+    {label:"BTC",  sym:"COINBASE:BTCUSD"},
+    {label:"ETH",  sym:"COINBASE:ETHUSD"},
+    {label:"SOL",  sym:"COINBASE:SOLUSD"},
+    {label:"BNB",  sym:"BINANCE:BNBUSDT"},
+    {label:"XRP",  sym:"COINBASE:XRPUSD"},
+    {label:"ADA",  sym:"COINBASE:ADAUSD"},
+    {label:"AVAX", sym:"COINBASE:AVAXUSD"},
+    {label:"DOGE", sym:"COINBASE:DOGEUSD"},
+    {label:"LINK", sym:"COINBASE:LINKUSD"},
+    {label:"DOT",  sym:"COINBASE:DOTUSD"},
+    {label:"MATIC",sym:"COINBASE:MATICUSD"},
+    {label:"ATOM", sym:"COINBASE:ATOMUSD"},
+  ],
+  stocks: [
+    {label:"SPX",   sym:"VANTAGE:SP500"},
+    {label:"NDX",   sym:"VANTAGE:NAS100"},
+    {label:"AAPL",  sym:"NASDAQ:AAPL"},
+    {label:"MSFT",  sym:"NASDAQ:MSFT"},
+    {label:"NVDA",  sym:"NASDAQ:NVDA"},
+    {label:"TSLA",  sym:"NASDAQ:TSLA"},
+    {label:"AMZN",  sym:"NASDAQ:AMZN"},
+    {label:"GOOGL", sym:"NASDAQ:GOOGL"},
+    {label:"META",  sym:"NASDAQ:META"},
+    {label:"JPM",   sym:"NYSE:JPM"},
+    {label:"BRKB",  sym:"NYSE:BRK.B"},
+    {label:"XOM",   sym:"NYSE:XOM"},
+  ],
+  forex: [
+    {label:"EUR/USD", sym:"FX:EURUSD"},
+    {label:"GBP/USD", sym:"FX:GBPUSD"},
+    {label:"USD/JPY", sym:"FX:USDJPY"},
+    {label:"AUD/USD", sym:"FX:AUDUSD"},
+    {label:"USD/CAD", sym:"FX:USDCAD"},
+    {label:"EUR/JPY", sym:"FX:EURJPY"},
+    {label:"GBP/JPY", sym:"FX:GBPJPY"},
+    {label:"USD/CHF", sym:"FX:USDCHF"},
+    {label:"NZD/USD", sym:"FX:NZDUSD"},
+    {label:"EUR/GBP", sym:"FX:EURGBP"},
+  ],
+  commodities: [
+    {label:"Gold",    sym:"TVC:GOLD"},
+    {label:"Silver",  sym:"CAPITALCOM:SILVER"},
+    {label:"WTI",     sym:"CAPITALCOM:OIL_CRUDE"},
+    {label:"Brent",   sym:"TVC:UKOIL"},
+    {label:"Gas",     sym:"CAPITALCOM:NATURALGAS"},
+    {label:"Copper",  sym:"CAPITALCOM:COPPER"},
+    {label:"Wheat",   sym:"CAPITALCOM:WHEAT"},
+    {label:"Corn",    sym:"CAPITALCOM:CORN"},
+  ],
+};
+
 const PROXY = "https://corsproxy.io/?";
 let currentTf  = "60";
 let isDark     = true;
@@ -878,6 +1316,10 @@ let subCommoditiesLoaded = false;
 let btcethLoaded = false;
 let wlLoaded = false;
 let pfLoaded = false;
+let wyckoffLoaded = false;
+let wykSym = "COINBASE:BTCUSD";
+let wykTf  = "D";
+let wykCat = "crypto";
 
 // ══════════════════════════════════════════════════════════════
 //  TABS
@@ -903,6 +1345,7 @@ document.querySelectorAll(".tab-btn").forEach(btn => {
     if (tab === "dashboard")      { renderAll(currentTf); }
     if (tab === "watchlist"       && !wlLoaded)             { wlLoaded = true;             loadWatchlist(); }
     if (tab === "portfolio"       && !pfLoaded)             { pfLoaded = true;             loadPortfolio(); }
+    if (tab === "wyckoff"         && !wyckoffLoaded)        { wyckoffLoaded = true;        loadWyckoff(); }
   });
 });
 
@@ -919,6 +1362,7 @@ document.getElementById("theme-btn").addEventListener("click", () => {
   if (subCommoditiesLoaded) renderSubCommodities(currentTf);
   if (stocksLoaded)         renderStocks(currentTf);
   if (btcethLoaded)         renderBtcEth(currentTf);
+  if (wyckoffLoaded)        requestAnimationFrame(renderWyckoffChart);
 });
 
 // ══════════════════════════════════════════════════════════════
@@ -2812,6 +3256,117 @@ function loadCalendar(){
   s.async=true;
   s.innerHTML=JSON.stringify({colorTheme:isDark?"dark":"light",isTransparent:true,width:"100%",height:"280",locale:"en",importanceFilter:"1",currencyFilter:"USD"});
   wrap.appendChild(s);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  WYCKOFF TAB
+// ══════════════════════════════════════════════════════════════
+function renderWyckoffChart() {
+  const wrap = document.getElementById("wrap-WYCKOFF");
+  if (!wrap) return;
+  const old = document.getElementById("tv_WYCKOFF");
+  if (old) old.remove();
+  const div = document.createElement("div");
+  div.id = "tv_WYCKOFF";
+  div.style.cssText = "position:absolute;inset:0;width:100%;height:100%;";
+  wrap.insertBefore(div, wrap.firstChild);
+  new TradingView.widget({
+    autosize: true,
+    symbol: wykSym,
+    interval: wykTf,
+    timezone: "Etc/UTC",
+    theme: isDark ? "dark" : "light",
+    style: "1",
+    locale: "en",
+    toolbar_bg: isDark ? "#1c2128" : "#f0f2f5",
+    enable_publishing: false,
+    hide_top_toolbar: false,
+    hide_legend: false,
+    hide_side_toolbar: false,
+    allow_symbol_change: true,
+    save_image: false,
+    studies: ["Volume@tv-basicstudies"],
+    container_id: "tv_WYCKOFF",
+    backgroundColor: isDark ? "rgba(13,17,23,1)" : "rgba(246,248,250,1)",
+    gridColor: isDark ? "rgba(48,54,61,.5)" : "rgba(208,215,222,.5)",
+  });
+}
+
+function renderWyckoffSymbols(cat) {
+  wykCat = cat;
+  const syms = WYCKOFF_SYMBOLS[cat];
+  const group = document.getElementById("wyk-sym-group");
+  group.innerHTML = syms.map((s, i) =>
+    `<button class="wyk-sym-btn${i === 0 ? " active" : ""}" data-sym="${s.sym}">${s.label}</button>`
+  ).join("");
+  wykSym = syms[0].sym;
+  group.querySelectorAll(".wyk-sym-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      group.querySelectorAll(".wyk-sym-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      wykSym = btn.dataset.sym;
+      renderWyckoffChart();
+    });
+  });
+}
+
+function loadWyckoff() {
+  // Category buttons
+  document.querySelectorAll(".wyk-cat-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".wyk-cat-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      renderWyckoffSymbols(btn.dataset.wykCat);
+      renderWyckoffChart();
+    });
+  });
+  // Timeframe buttons
+  document.querySelectorAll(".wyk-tf-btn").forEach(btn => {
+    if (!btn.dataset.wykTf) return;
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".wyk-tf-btn[data-wyk-tf]").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      wykTf = btn.dataset.wykTf;
+      renderWyckoffChart();
+    });
+  });
+  // Guide panel toggle
+  const toggleBtn = document.getElementById("wyk-panel-toggle");
+  const infoPanel = document.getElementById("wyk-info-panel");
+  if (toggleBtn && infoPanel) {
+    toggleBtn.addEventListener("click", () => {
+      infoPanel.classList.toggle("collapsed");
+    });
+  }
+  // Script modal
+  const scriptModal = document.getElementById("wyk-script-modal");
+  const codeBlock   = document.getElementById("wyk-code-block");
+  const copyBtn     = document.getElementById("wyk-copy-btn");
+  const scriptBtn   = document.getElementById("wyk-script-btn");
+  if (codeBlock) codeBlock.textContent = WYCKOFF_PINE_SCRIPT;
+  const closeWykModal = () => scriptModal.classList.remove("open");
+  const tvLink = document.getElementById("wyk-tv-link");
+  const updateTvLink = () => {
+    if (tvLink) tvLink.href = "https://www.tradingview.com/chart/?symbol=" + encodeURIComponent(wykSym);
+  };
+  scriptBtn?.addEventListener("click", () => { updateTvLink(); scriptModal.classList.add("open"); });
+  document.getElementById("wyk-modal-close")?.addEventListener("click", closeWykModal);
+  document.getElementById("wyk-modal-close2")?.addEventListener("click", closeWykModal);
+  scriptModal?.addEventListener("click", e => { if (e.target === scriptModal) closeWykModal(); });
+  copyBtn?.addEventListener("click", () => {
+    navigator.clipboard.writeText(WYCKOFF_PINE_SCRIPT).then(() => {
+      copyBtn.textContent = "✅ Copiado!";
+      setTimeout(() => { copyBtn.textContent = "📋 Copiar Script"; }, 2500);
+    }).catch(() => {
+      codeBlock.select?.();
+      document.execCommand("copy");
+      copyBtn.textContent = "✅ Copiado!";
+      setTimeout(() => { copyBtn.textContent = "📋 Copiar Script"; }, 2500);
+    });
+  });
+  // Initial render — defer one frame so flex layout settles
+  renderWyckoffSymbols("crypto");
+  requestAnimationFrame(renderWyckoffChart);
 }
 
 // ══════════════════════════════════════════════════════════════
